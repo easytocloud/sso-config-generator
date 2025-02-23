@@ -21,8 +21,51 @@ pip install sso-config-generator
 ### Prerequisites
 
 - Python 3.8 or higher
-- AWS CLI v2
+- AWS CLI v2 configured with:
+  - Default region set in `~/.aws/config` or via `AWS_DEFAULT_REGION` environment variable
+  - AWS SSO configured via `aws configure sso`
 - `direnv` (optional, for automatic profile switching)
+
+### AWS Configuration
+
+Before using the tool, ensure you have:
+
+1. Set your AWS region:
+   ```bash
+   # Either in ~/.aws/config
+   [default]
+   region = eu-west-1
+
+   # Or via environment variable
+   export AWS_DEFAULT_REGION=eu-west-1
+   ```
+
+2. Configure AWS SSO:
+   ```bash
+   # Configure SSO
+   aws configure sso
+   # Follow the prompts to enter:
+   # - SSO start URL (e.g., https://your-domain.awsapps.com/start)
+   # - SSO Region
+   # - SSO registration scopes (accept default)
+   
+   # Login to SSO to create credentials
+   aws sso login
+   ```
+
+### Troubleshooting
+
+1. "Error: You must specify a region"
+   - Set AWS_DEFAULT_REGION environment variable
+   - Or configure default region in ~/.aws/config
+
+2. "Unable to locate credentials"
+   - Run `aws sso login` to refresh your SSO credentials
+   - Ensure you've completed AWS SSO configuration with `aws configure sso`
+   - Check if your SSO session has expired (sessions typically last 8 hours)
+
+3. "SSO session is expired"
+   - Run `aws sso login` to start a new session
 
 ## Usage
 

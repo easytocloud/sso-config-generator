@@ -1,6 +1,6 @@
 [project]
 name = "sso-config-generator"
-dynamic = ["version"]
+version = "0.1.0"
 description = "Python tool for generating AWS SSO configuration and directory structure"
 authors = [
     {name = "easytocloud", email = "info@easytocloud.com"}
@@ -36,13 +36,8 @@ Issues = "https://github.com/easytocloud/sso-config-generator/issues"
 Changelog = "https://github.com/easytocloud/sso-config-generator/blob/main/CHANGELOG.md"
 
 [build-system]
-requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
+requires = ["setuptools>=45"]
 build-backend = "setuptools.build_meta"
 
 [project.scripts]
 sso-config-generator = "sso_config_generator.cli:cli"
-
-[tool.setuptools_scm]
-write_to = "src/sso_config_generator/_version.py"
-version_scheme = "semver"
-local_scheme = "no-local-version"
