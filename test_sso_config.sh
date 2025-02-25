@@ -8,6 +8,9 @@ pip install -e .
 echo -e "\n=== Testing basic usage ==="
 uvx sso-config-generator --help
 
+echo -e "\n=== Testing version flag ==="
+uvx sso-config-generator --version
+
 echo -e "\n=== Testing with different flags ==="
 echo "1. Basic usage (dry run):"
 uvx sso-config-generator --no-create-directories
