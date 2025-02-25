@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/easytocloud/sso-config-generator/compare/v1.0.1...v1.0.2) (2025-02-25)
+
+
+### Bug Fixes
+
+* update version to 0.3.0 ([b94c064](https://github.com/easytocloud/sso-config-generator/commit/b94c064fd58056f42167d22ad15bd5ff477bafb3))
+
 ## [1.0.1](https://github.com/easytocloud/sso-config-generator/compare/v1.0.0...v1.0.1) (2025-02-25)
 
 
