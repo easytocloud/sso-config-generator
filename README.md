@@ -74,19 +74,19 @@ Before using the tool, ensure you have:
 Simply run:
 
 ```bash
-sso-config-generator generate
+uvx sso-config-generator
 ```
 
 This will:
 - Create/update your AWS CLI config file (`~/.aws/config`)
-- Generate a directory structure under `~/unified-environment/`
+- Generate a directory structure in the current directory + sso-name
 - Create `.envrc` files in each account directory with AdministratorAccess role
 - Use OU structure for directory organization (cached for performance)
 
 The tool caches OU structure information in `~/.aws/.ou` to improve performance. When the cache exists, it will be used automatically with a notification. To rebuild the cache:
 
 ```bash
-sso-config-generator generate --rebuild-cache
+uvx sso-config-generator --rebuild-cache
 ```
 
 ### Command Options
@@ -96,36 +96,64 @@ Usage: sso-config-generator [OPTIONS]
 
 Options:
   --create-directories/--no-create-directories  Create a directory for each account (default: True)
-  --use-ou-structure/--no-use-ou-structure     Use the OU structure in the unified environment (default: True)
-  --developer-role-name NAME                    Create .envrc files for the specified role (default: AdministratorAccess)
-  --rebuild-cache                               Force rebuild of OU structure cache
-  --sso-name NAME            Use specified SSO name instead of SSO start URL
-  --create-repos-md          Run cclist --create-repos-md for each directory
-  --skip-sso-name           Do not use the SSO name in the path
-  --unified-root PATH       Use different root for unified environment
-  --help                    Show this message and exit
+  --use-ou-structure/--no-use-ou-structure     Create directories for each OU (default: True)
+  --developer-role-name NAME                   Role name to use for .envrc files (default: AdministratorAccess)
+  --rebuild-cache                              Force rebuild of OU structure cache
+  --sso-name NAME                              Use specified SSO name instead of extracting from SSO start URL
+  --create-repos-md                            Create repos.md files in each account directory
+  --skip-sso-name                              Do not create a directory for the SSO name (default: False)
+  --unified-root PATH                          Directory where account directories are created
+                                               (default: current directory)
+                                               If current directory is named "environment", SSO name is
+                                               automatically skipped
+  --validate                                   Validate current AWS SSO configuration instead of generating
+  --help                                       Show this message and exit
+  --version                                    Show the version and exit
 ```
 
 ### Examples
 
 1. Basic config generation (uses defaults):
 ```bash
-sso-config-generator generate
+uvx sso-config-generator
 ```
 
-2. Disable OU structure:
+2. Disable OU structure (flat account directories):
 ```bash
-sso-config-generator generate --no-use-ou-structure
+uvx sso-config-generator --no-use-ou-structure
 ```
 
-3. Use different role:
+3. Use different role for .envrc files:
 ```bash
-sso-config-generator generate --developer-role-name DevRole
+uvx sso-config-generator --developer-role-name ReadOnlyAccess
 ```
 
 4. Force rebuild of OU cache:
 ```bash
-sso-config-generator generate --rebuild-cache
+uvx sso-config-generator --rebuild-cache
+```
+
+5. Specify custom root directory:
+```bash
+uvx sso-config-generator --unified-root ~/aws-environments
+```
+
+6. Skip creating directories (config file only):
+```bash
+uvx sso-config-generator --no-create-directories
+```
+
+7. Working in an "environment" directory (automatic behavior):
+```bash
+# If your current directory is named 'environment'
+cd environment
+uvx sso-config-generator
+# This will automatically skip creating the SSO name directory
+```
+
+8. Validate existing configuration:
+```bash
+uvx sso-config-generator --validate
 ```
 
 ## Development
@@ -144,18 +172,16 @@ python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-3. Install development dependencies:
+3. Install the package in development mode:
 ```bash
-make dev-setup
+pip install -e .
 ```
 
 ### Common Development Tasks
 
-- Build the package: `make build`
-- Run tests: `make test`
-- Lint code: `make lint`
-- Format code: `make format`
-- Clean build artifacts: `make clean`
+- Build the package: `pip install build && python -m build`
+- Run the tool: `uvx sso-config-generator`
+- Test changes: `./test_sso_config.sh`
 
 ## Contributing
 

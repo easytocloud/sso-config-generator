@@ -3,3 +3,1140 @@
 sso_region = eu-west-1
 sso_start_url = https://hccloud.awsapps.com/start
 sso_registration_scopes = sso:account:access
+
+[profile AdministratorAccess@_Main_Holland_Casino]
+sso_session = sso
+sso_account_id = 204392078325
+sso_role_name = AdministratorAccess
+region = eu-west-1
+# BEGIN SSO-CONFIG-GENERATOR MANAGED BLOCK
+[profile AdministratorAccess@hco-mail-pipeline]
+sso_session = sso
+sso_account_id = 533267121656
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hco-mail-pipeline]
+sso_session = sso
+sso_account_id = 533267121656
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hco-mail-test]
+sso_session = sso
+sso_account_id = 381491836982
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hco-mail-test]
+sso_session = sso
+sso_account_id = 381491836982
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@OpsProd]
+sso_session = sso
+sso_account_id = 048721791703
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@OpsProd]
+sso_session = sso
+sso_account_id = 048721791703
+sso_role_name = _Support
+region = eu-west-1
+
+[profile _AuditReadOnly@Control Tower Audit]
+sso_session = sso
+sso_account_id = 864143239628
+sso_role_name = _AuditReadOnly
+region = eu-west-1
+
+[profile AdministratorAccess@Control Tower Audit]
+sso_session = sso
+sso_account_id = 864143239628
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@Control Tower Audit]
+sso_session = sso
+sso_account_id = 864143239628
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@HCDocuments-accept]
+sso_session = sso
+sso_account_id = 225250963327
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@HCDocuments-accept]
+sso_session = sso
+sso_account_id = 225250963327
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hc-neon-accept]
+sso_session = sso
+sso_account_id = 985539774675
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hc-neon-accept]
+sso_session = sso
+sso_account_id = 985539774675
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@HCSCProd]
+sso_session = sso
+sso_account_id = 310138023206
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@HCSCProd]
+sso_session = sso
+sso_account_id = 310138023206
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hc-BI-development]
+sso_session = sso
+sso_account_id = 905418043683
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hc-BI-development]
+sso_session = sso
+sso_account_id = 905418043683
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hc-neon-development]
+sso_session = sso
+sso_account_id = 225989344110
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hc-neon-development]
+sso_session = sso
+sso_account_id = 225989344110
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@HCDocuments-production]
+sso_session = sso
+sso_account_id = 315914110405
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@HCDocuments-production]
+sso_session = sso
+sso_account_id = 315914110405
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hc-BI-accept]
+sso_session = sso
+sso_account_id = 533267310380
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hc-BI-accept]
+sso_session = sso
+sso_account_id = 533267310380
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@IMShadow Acceptance]
+sso_session = sso
+sso_account_id = 675104262827
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@IMShadow Acceptance]
+sso_session = sso
+sso_account_id = 675104262827
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@Innovation2]
+sso_session = sso
+sso_account_id = 705276266783
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@Innovation2]
+sso_session = sso
+sso_account_id = 705276266783
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hc-neon-production]
+sso_session = sso
+sso_account_id = 337909779622
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hc-neon-production]
+sso_session = sso
+sso_account_id = 337909779622
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@Control Tower Log Archive]
+sso_session = sso
+sso_account_id = 997358057493
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@Control Tower Log Archive]
+sso_session = sso
+sso_account_id = 997358057493
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@HCDocuments-pipeline]
+sso_session = sso
+sso_account_id = 329281310763
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@HCDocuments-pipeline]
+sso_session = sso
+sso_account_id = 329281310763
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@Innovation1]
+sso_session = sso
+sso_account_id = 270577686952
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@Innovation1]
+sso_session = sso
+sso_account_id = 270577686952
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@monitoringProd]
+sso_session = sso
+sso_account_id = 065927267043
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@monitoringProd]
+sso_session = sso
+sso_account_id = 065927267043
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hcdatadev]
+sso_session = sso
+sso_account_id = 150125046079
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hcdatadev]
+sso_session = sso
+sso_account_id = 150125046079
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hc-BI-pipeline]
+sso_session = sso
+sso_account_id = 905418345490
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hc-BI-pipeline]
+sso_session = sso
+sso_account_id = 905418345490
+sso_role_name = _Support
+region = eu-west-1
+
+[profile _CloudXServiceCatalogAccess@hc-tools]
+sso_session = sso
+sso_account_id = 256928933720
+sso_role_name = _CloudXServiceCatalogAccess
+region = eu-west-1
+
+[profile AdministratorAccess@hc-tools]
+sso_session = sso
+sso_account_id = 256928933720
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hc-tools]
+sso_session = sso
+sso_account_id = 256928933720
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@IMShadow Development]
+sso_session = sso
+sso_account_id = 902738725857
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@IMShadow Development]
+sso_session = sso
+sso_account_id = 902738725857
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@HCDocuments-test]
+sso_session = sso
+sso_account_id = 518217519416
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@HCDocuments-test]
+sso_session = sso
+sso_account_id = 518217519416
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hcwebsites-test]
+sso_session = sso
+sso_account_id = 483866290687
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hcwebsites-test]
+sso_session = sso
+sso_account_id = 483866290687
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hcwebsites-pipeline]
+sso_session = sso
+sso_account_id = 472582763447
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hcwebsites-pipeline]
+sso_session = sso
+sso_account_id = 472582763447
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@Levi9ServicesTest]
+sso_session = sso
+sso_account_id = 410071598724
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@Levi9ServicesTest]
+sso_session = sso
+sso_account_id = 410071598724
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@HCBackup]
+sso_session = sso
+sso_account_id = 067303209739
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@HCBackup]
+sso_session = sso
+sso_account_id = 067303209739
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hcbusinessprocesses-development]
+sso_session = sso
+sso_account_id = 407102913448
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hcbusinessprocesses-development]
+sso_session = sso
+sso_account_id = 407102913448
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@OpsPipeline]
+sso_session = sso
+sso_account_id = 566044406346
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@OpsPipeline]
+sso_session = sso
+sso_account_id = 566044406346
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@EsbProd]
+sso_session = sso
+sso_account_id = 830975237161
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@EsbProd]
+sso_session = sso
+sso_account_id = 830975237161
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@IMShadow Test]
+sso_session = sso
+sso_account_id = 595197226708
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@IMShadow Test]
+sso_session = sso
+sso_account_id = 595197226708
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hc-BA-test]
+sso_session = sso
+sso_account_id = 977099024690
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hc-BA-test]
+sso_session = sso
+sso_account_id = 977099024690
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@OpsAccept]
+sso_session = sso
+sso_account_id = 941025587249
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@OpsAccept]
+sso_session = sso
+sso_account_id = 941025587249
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@Levi9ServicesPipeline]
+sso_session = sso
+sso_account_id = 442715128485
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@Levi9ServicesPipeline]
+sso_session = sso
+sso_account_id = 442715128485
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@HCSCAccept]
+sso_session = sso
+sso_account_id = 430682564122
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@HCSCAccept]
+sso_session = sso
+sso_account_id = 430682564122
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@SecondaryDns]
+sso_session = sso
+sso_account_id = 165345469324
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _PublicDNSReadOnly@SecondaryDns]
+sso_session = sso
+sso_account_id = 165345469324
+sso_role_name = _PublicDNSReadOnly
+region = eu-west-1
+
+[profile _Support@SecondaryDns]
+sso_session = sso
+sso_account_id = 165345469324
+sso_role_name = _Support
+region = eu-west-1
+
+[profile _PublicDNSAdmin@SecondaryDns]
+sso_session = sso
+sso_account_id = 165345469324
+sso_role_name = _PublicDNSAdmin
+region = eu-west-1
+
+[profile AdministratorAccess@hc-neon-test]
+sso_session = sso
+sso_account_id = 971422673008
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hc-neon-test]
+sso_session = sso
+sso_account_id = 971422673008
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hcwebsites-accept]
+sso_session = sso
+sso_account_id = 136612636059
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hcwebsites-accept]
+sso_session = sso
+sso_account_id = 136612636059
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@EsbAccept]
+sso_session = sso
+sso_account_id = 832143045954
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@EsbAccept]
+sso_session = sso
+sso_account_id = 832143045954
+sso_role_name = _Support
+region = eu-west-1
+
+[profile _CarbonViewer@_Main Holland Casino]
+sso_session = sso
+sso_account_id = 204392078325
+sso_role_name = _CarbonViewer
+region = eu-west-1
+
+[profile AdministratorAccess@_Main Holland Casino]
+sso_session = sso
+sso_account_id = 204392078325
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@_Main Holland Casino]
+sso_session = sso
+sso_account_id = 204392078325
+sso_role_name = _Support
+region = eu-west-1
+
+[profile _Billing@_Main Holland Casino]
+sso_session = sso
+sso_account_id = 204392078325
+sso_role_name = _Billing
+region = eu-west-1
+
+[profile AdministratorAccess@hcbusinessprocesses-production]
+sso_session = sso
+sso_account_id = 357787254317
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hcbusinessprocesses-production]
+sso_session = sso
+sso_account_id = 357787254317
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hcwebsites-development]
+sso_session = sso
+sso_account_id = 959293052325
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hcwebsites-development]
+sso_session = sso
+sso_account_id = 959293052325
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hc-BA-pipeline]
+sso_session = sso
+sso_account_id = 820242908433
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hc-BA-pipeline]
+sso_session = sso
+sso_account_id = 820242908433
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hc-BI-test]
+sso_session = sso
+sso_account_id = 654654273610
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hc-BI-test]
+sso_session = sso
+sso_account_id = 654654273610
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hc-BA-production]
+sso_session = sso
+sso_account_id = 503561440041
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hc-BA-production]
+sso_session = sso
+sso_account_id = 503561440041
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@Osint]
+sso_session = sso
+sso_account_id = 055872027364
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@Osint]
+sso_session = sso
+sso_account_id = 055872027364
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hcbusinessprocesses-accept]
+sso_session = sso
+sso_account_id = 292675662953
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hcbusinessprocesses-accept]
+sso_session = sso
+sso_account_id = 292675662953
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@HCGatewayTest]
+sso_session = sso
+sso_account_id = 044475954744
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@HCGatewayTest]
+sso_session = sso
+sso_account_id = 044475954744
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hco-mail-accept]
+sso_session = sso
+sso_account_id = 730335586404
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hco-mail-accept]
+sso_session = sso
+sso_account_id = 730335586404
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@HCGatewayPipeline]
+sso_session = sso
+sso_account_id = 228737314197
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@HCGatewayPipeline]
+sso_session = sso
+sso_account_id = 228737314197
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hcnetwork]
+sso_session = sso
+sso_account_id = 967558243597
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hcnetwork]
+sso_session = sso
+sso_account_id = 967558243597
+sso_role_name = _Support
+region = eu-west-1
+
+[profile _PublicDNSReadOnly@hcnetwork]
+sso_session = sso
+sso_account_id = 967558243597
+sso_role_name = _PublicDNSReadOnly
+region = eu-west-1
+
+[profile _PublicDNSAdmin@hcnetwork]
+sso_session = sso
+sso_account_id = 967558243597
+sso_role_name = _PublicDNSAdmin
+region = eu-west-1
+
+[profile AdministratorAccess@EsbDev]
+sso_session = sso
+sso_account_id = 140119043835
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@EsbDev]
+sso_session = sso
+sso_account_id = 140119043835
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@Innovation3]
+sso_session = sso
+sso_account_id = 601737583809
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@Innovation3]
+sso_session = sso
+sso_account_id = 601737583809
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@Vault]
+sso_session = sso
+sso_account_id = 524617612708
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@Vault]
+sso_session = sso
+sso_account_id = 524617612708
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@IMShadow Production]
+sso_session = sso
+sso_account_id = 025358811738
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@IMShadow Production]
+sso_session = sso
+sso_account_id = 025358811738
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hco-mail-production]
+sso_session = sso
+sso_account_id = 767397849642
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hco-mail-production]
+sso_session = sso
+sso_account_id = 767397849642
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@OpsDev]
+sso_session = sso
+sso_account_id = 249517966977
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@OpsDev]
+sso_session = sso
+sso_account_id = 249517966977
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@HCDocuments-development]
+sso_session = sso
+sso_account_id = 721702805030
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@HCDocuments-development]
+sso_session = sso
+sso_account_id = 721702805030
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@IMShadow Pipeline]
+sso_session = sso
+sso_account_id = 692296066457
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@IMShadow Pipeline]
+sso_session = sso
+sso_account_id = 692296066457
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hcrepositories]
+sso_session = sso
+sso_account_id = 247083357218
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hcrepositories]
+sso_session = sso
+sso_account_id = 247083357218
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@EsbTest]
+sso_session = sso
+sso_account_id = 534068682562
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@EsbTest]
+sso_session = sso
+sso_account_id = 534068682562
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hcbusinessprocesses-pipeline]
+sso_session = sso
+sso_account_id = 869147168930
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hcbusinessprocesses-pipeline]
+sso_session = sso
+sso_account_id = 869147168930
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hcscdev]
+sso_session = sso
+sso_account_id = 736114016694
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hcscdev]
+sso_session = sso
+sso_account_id = 736114016694
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hc-BI-production]
+sso_session = sso
+sso_account_id = 992382411966
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hc-BI-production]
+sso_session = sso
+sso_account_id = 992382411966
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hchrarchive]
+sso_session = sso
+sso_account_id = 350337232161
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hchrarchive]
+sso_session = sso
+sso_account_id = 350337232161
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hc-BA-development]
+sso_session = sso
+sso_account_id = 841162714142
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hc-BA-development]
+sso_session = sso
+sso_account_id = 841162714142
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@EsbPipeline]
+sso_session = sso
+sso_account_id = 107952967689
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@EsbPipeline]
+sso_session = sso
+sso_account_id = 107952967689
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@HCGatewayAccept]
+sso_session = sso
+sso_account_id = 360129271006
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@HCGatewayAccept]
+sso_session = sso
+sso_account_id = 360129271006
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@monitoringOta]
+sso_session = sso
+sso_account_id = 088903042793
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@monitoringOta]
+sso_session = sso
+sso_account_id = 088903042793
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@OpsTest]
+sso_session = sso
+sso_account_id = 735140288434
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@OpsTest]
+sso_session = sso
+sso_account_id = 735140288434
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@HCGatewayProd]
+sso_session = sso
+sso_account_id = 540396922825
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@HCGatewayProd]
+sso_session = sso
+sso_account_id = 540396922825
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hcdataaccept]
+sso_session = sso
+sso_account_id = 859784052340
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hcdataaccept]
+sso_session = sso
+sso_account_id = 859784052340
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hcdatascience]
+sso_session = sso
+sso_account_id = 211298126533
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hcdatascience]
+sso_session = sso
+sso_account_id = 211298126533
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@HCGatewayDev]
+sso_session = sso
+sso_account_id = 356289954465
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@HCGatewayDev]
+sso_session = sso
+sso_account_id = 356289954465
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hcbusinessprocesses-test]
+sso_session = sso
+sso_account_id = 295681410011
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hcbusinessprocesses-test]
+sso_session = sso
+sso_account_id = 295681410011
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hcscpipeline]
+sso_session = sso
+sso_account_id = 857430010015
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hcscpipeline]
+sso_session = sso
+sso_account_id = 857430010015
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hco-mail-development]
+sso_session = sso
+sso_account_id = 381492126402
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hco-mail-development]
+sso_session = sso
+sso_account_id = 381492126402
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hcdatatest]
+sso_session = sso
+sso_account_id = 573274838037
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hcdatatest]
+sso_session = sso
+sso_account_id = 573274838037
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hc-neon-pipeline]
+sso_session = sso
+sso_account_id = 225989358755
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hc-neon-pipeline]
+sso_session = sso
+sso_account_id = 225989358755
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hcprod]
+sso_session = sso
+sso_account_id = 724052717729
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _SESReadOnly@hcprod]
+sso_session = sso
+sso_account_id = 724052717729
+sso_role_name = _SESReadOnly
+region = eu-west-1
+
+[profile _Support@hcprod]
+sso_session = sso
+sso_account_id = 724052717729
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@SystemsManager]
+sso_session = sso
+sso_account_id = 761673177463
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@SystemsManager]
+sso_session = sso
+sso_account_id = 761673177463
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hc-BA-accept]
+sso_session = sso
+sso_account_id = 050451358150
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hc-BA-accept]
+sso_session = sso
+sso_account_id = 050451358150
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hcdatapipeline]
+sso_session = sso
+sso_account_id = 471880404099
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hcdatapipeline]
+sso_session = sso
+sso_account_id = 471880404099
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hcdataprod]
+sso_session = sso
+sso_account_id = 547978798245
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hcdataprod]
+sso_session = sso
+sso_account_id = 547978798245
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@Levi9ServicesDev]
+sso_session = sso
+sso_account_id = 280236111296
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@Levi9ServicesDev]
+sso_session = sso
+sso_account_id = 280236111296
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hcdatascience-online]
+sso_session = sso
+sso_account_id = 767397907177
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hcdatascience-online]
+sso_session = sso
+sso_account_id = 767397907177
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@EsbCentral]
+sso_session = sso
+sso_account_id = 924264808423
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@EsbCentral]
+sso_session = sso
+sso_account_id = 924264808423
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@HCSCTest]
+sso_session = sso
+sso_account_id = 901943642138
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@HCSCTest]
+sso_session = sso
+sso_account_id = 901943642138
+sso_role_name = _Support
+region = eu-west-1
+
+[profile AdministratorAccess@hcwebsites-production]
+sso_session = sso
+sso_account_id = 537421736893
+sso_role_name = AdministratorAccess
+region = eu-west-1
+
+[profile _Support@hcwebsites-production]
+sso_session = sso
+sso_account_id = 537421736893
+sso_role_name = _Support
+region = eu-west-1
+
+# END SSO-CONFIG-GENERATOR MANAGED BLOCK
+
+
+
+
+
+
+
