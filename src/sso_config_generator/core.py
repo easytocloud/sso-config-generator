@@ -34,13 +34,26 @@ class SSOConfigGenerator:
         self.developer_role_name = developer_role_name
         self.sso_name = sso_name
         self.create_repos_md = create_repos_md
-        self.skip_sso_name = skip_sso_name
-        self.unified_root = unified_root or os.path.expanduser("~/unified-environment")
+        
+        # Set unified_root with proper default (current directory)
+        self.unified_root = unified_root or os.getcwd()
+        
+        # Handle skip_sso_name logic
+        # If current directory is named 'environment', automatically skip SSO name
+        if os.path.basename(os.getcwd()) == 'environment' and unified_root is None:
+            self.skip_sso_name = True
+        else:
+            # Otherwise respect the provided flag
+            self.skip_sso_name = skip_sso_name
         
         # Config paths
-        self.aws_config_path = os.path.expanduser("~/.aws/config")
-        self.ou_cache_path = os.path.expanduser("~/.aws/.ou")
-        self.sso_cache_dir = os.path.expanduser("~/.aws/sso/cache")
+        self.aws_config_path = os.environ.get('AWS_CONFIG_FILE', os.path.expanduser("~/.aws/config"))
+        self.aws_credentials_path = os.environ.get('AWS_SHARED_CREDENTIALS_FILE', os.path.expanduser("~/.aws/credentials"))
+        
+        # Store cache in the same directory as the config file
+        config_dir = os.path.dirname(self.aws_config_path)
+        self.ou_cache_path = os.path.join(config_dir, ".ou")
+        self.sso_cache_dir = os.path.expanduser("~/.aws/sso/cache")  # This is used by AWS CLI, so we keep it as is
         self.config = configparser.ConfigParser()
         
         # AWS clients
@@ -59,6 +72,9 @@ class SSOConfigGenerator:
         """
         try:
             print("\n=== Generating SSO Configuration ===\n")
+            print(f"Using AWS config file: {self.aws_config_path}")
+            print(f"Using AWS credentials file: {self.aws_credentials_path}")
+            print(f"Using OU cache file: {self.ou_cache_path}")
             
             # Get SSO information
             sso_info = self._get_sso_info()
@@ -124,21 +140,49 @@ class SSOConfigGenerator:
         try:
             # Get SSO start URL and region from AWS config if exists
             self.config.read(self.aws_config_path)
-            if "default" in self.config:
+            
+            # First check for sso-session section
+            if "sso-session sso" in self.config:
+                # Debug output
+                print(f"Found sso-session sso section in config file")
+                print(f"sso_start_url: {self.config['sso-session sso'].get('sso_start_url')}")
+                print(f"sso_region: {self.config['sso-session sso'].get('sso_region')}")
+                
+                start_url = self.config["sso-session sso"].get("sso_start_url")
+                sso_name = self._extract_sso_name(start_url)
+                print(f"Extracted SSO name: {sso_name}")
+                
                 return {
-                    "start_url": self.config["default"].get("sso_start_url"),
+                    "start_url": start_url,
+                    "region": self.config["sso-session sso"].get("sso_region"),
+                    "name": self.sso_name or sso_name
+                }
+            # Then check default section
+            elif "default" in self.config:
+                print(f"Found default section in config file")
+                print(f"sso_start_url: {self.config['default'].get('sso_start_url')}")
+                print(f"sso_region: {self.config['default'].get('sso_region')}")
+                
+                start_url = self.config["default"].get("sso_start_url")
+                sso_name = self._extract_sso_name(start_url)
+                print(f"Extracted SSO name: {sso_name}")
+                
+                return {
+                    "start_url": start_url,
                     "region": self.config["default"].get("sso_region"),
-                    "name": self.sso_name or self._extract_sso_name()
+                    "name": self.sso_name or sso_name
                 }
             
             # Otherwise prompt for information
             start_url = input("Enter SSO start URL: ").strip()
             region = input("Enter SSO region [us-east-1]: ").strip() or "us-east-1"
+            sso_name = self._extract_sso_name(start_url)
+            print(f"Extracted SSO name: {sso_name}")
             
             return {
                 "start_url": start_url,
                 "region": region,
-                "name": self.sso_name or self._extract_sso_name(start_url)
+                "name": self.sso_name or sso_name
             }
             
         except Exception as e:
@@ -176,10 +220,14 @@ class SSOConfigGenerator:
                 
             accounts = []
             for account in cache_data['accounts']:
-                roles = self._get_account_roles(account['id'])
-                if roles:
-                    account['roles'] = roles
+                # Use roles from cache if available, otherwise get them from SSO
+                if 'roles' in account and account['roles']:
                     accounts.append(account)
+                else:
+                    roles = self._get_account_roles(account['id'])
+                    if roles:
+                        account['roles'] = roles
+                        accounts.append(account)
                     
             if not accounts:
                 print("No accessible accounts found in cache", file=sys.stderr)
@@ -400,33 +448,67 @@ class SSOConfigGenerator:
             bool: True if successful, False otherwise
         """
         try:
+            # Read existing config if it exists
+            existing_config = ""
+            start_marker = "# BEGIN SSO-CONFIG-GENERATOR MANAGED BLOCK"
+            end_marker = "# END SSO-CONFIG-GENERATOR MANAGED BLOCK"
+            
+            if os.path.exists(self.aws_config_path):
+                with open(self.aws_config_path, 'r') as f:
+                    existing_config = f.read()
+                
+                # Extract content outside of our markers
+                if start_marker in existing_config and end_marker in existing_config:
+                    before_marker = existing_config.split(start_marker)[0]
+                    after_marker = existing_config.split(end_marker)[1]
+                else:
+                    before_marker = existing_config
+                    after_marker = ""
+            else:
+                before_marker = ""
+                after_marker = ""
+            
+            # Create new config content
             config = configparser.ConfigParser()
             
-            # Add default section
-            config['default'] = {
-                'sso_start_url': sso_info['start_url'],
-                'sso_region': sso_info['region'],
-                'sso_account_id': accounts[0]['id'],  # Use first account as default
-                'sso_role_name': accounts[0]['roles'][0],  # Use first role as default
-                'region': sso_info['region']
-            }
+            # Add SSO session section if it doesn't exist in the before_marker
+            if "[sso-session sso]" not in before_marker:
+                config['sso-session sso'] = {
+                    'sso_region': sso_info['region'],
+                    'sso_start_url': sso_info['start_url'],
+                    'sso_registration_scopes': 'sso:account:access'
+                }
             
             # Add profile for each account/role combination
             for account in accounts:
                 for role in account['roles']:
                     profile_name = f"{role}@{account['name']}"
                     config[f"profile {profile_name}"] = {
-                        'sso_start_url': sso_info['start_url'],
-                        'sso_region': sso_info['region'],
+                        'sso_session': 'sso',
                         'sso_account_id': account['id'],
                         'sso_role_name': role,
                         'region': sso_info['region']
                     }
             
+            # Convert config to string
+            config_str = ""
+            for section in config.sections():
+                config_str += f"[{section}]\n"
+                for key, value in config[section].items():
+                    config_str += f"{key} = {value}\n"
+                config_str += "\n"
+            
+            # Combine with markers
+            final_config = before_marker
+            if not final_config.endswith("\n"):
+                final_config += "\n"
+            final_config += f"{start_marker}\n{config_str}{end_marker}\n"
+            final_config += after_marker
+            
             # Write config file
             os.makedirs(os.path.dirname(self.aws_config_path), exist_ok=True)
             with open(self.aws_config_path, 'w') as f:
-                config.write(f)
+                f.write(final_config)
                 
             return True
             
@@ -446,7 +528,15 @@ class SSOConfigGenerator:
         try:
             base_path = Path(self.unified_root)
             if not self.skip_sso_name:
-                sso_name = self.sso_name or self._extract_sso_name()
+                # Get SSO info to get the name
+                self.config.read(self.aws_config_path)
+                if "sso-session sso" in self.config:
+                    start_url = self.config["sso-session sso"].get("sso_start_url")
+                    sso_name = self._extract_sso_name(start_url)
+                else:
+                    sso_name = self.sso_name or self._extract_sso_name()
+                
+                print(f"Using SSO name for directory: {sso_name}")
                 base_path = base_path / self._sanitize_path(sso_name)
                 
             # Create base directory
@@ -457,7 +547,23 @@ class SSOConfigGenerator:
             
             # Create account directories
             for account in accounts:
-                account_path = base_path / self._sanitize_path(account['name'])
+                # If using OU structure, create directories for each OU level
+                if self.use_ou_structure and 'ou_path' in account:
+                    # Skip the root OU (/)
+                    ou_parts = [p for p in account['ou_path'].split('/') if p]
+                    
+                    # Build the path for this account based on OU structure
+                    account_base_path = base_path
+                    for ou_part in ou_parts:
+                        account_base_path = account_base_path / self._sanitize_path(ou_part)
+                        account_base_path.mkdir(exist_ok=True)
+                    
+                    # Create account directory within its OU
+                    account_path = account_base_path / self._sanitize_path(account['name'])
+                else:
+                    # Create account directory directly under base path
+                    account_path = base_path / self._sanitize_path(account['name'])
+                
                 account_path.mkdir(exist_ok=True)
                 
                 # Create .envrc file
@@ -475,17 +581,25 @@ class SSOConfigGenerator:
             print(f"Error creating directory structure: {str(e)}", file=sys.stderr)
             return False
             
-    def _store_generator_config(self, base_path: Path) -> None:
+    def _store_generator_config(self, base_path: Path, actual_sso_name: str = None) -> None:
         """Store generator configuration for future updates.
         
         Args:
             base_path: Base directory path
+            actual_sso_name: The actual SSO name used (optional)
         """
+        # If actual_sso_name is not provided, try to extract it from the config file
+        if not actual_sso_name:
+            self.config.read(self.aws_config_path)
+            if "sso-session sso" in self.config:
+                start_url = self.config["sso-session sso"].get("sso_start_url")
+                actual_sso_name = self._extract_sso_name(start_url)
+        
         config = {
             'create_directories': self.create_directories,
             'use_ou_structure': self.use_ou_structure,
             'developer_role_name': self.developer_role_name,
-            'sso_name': self.sso_name,
+            'sso_name': self.sso_name or actual_sso_name,  # Use actual SSO name if self.sso_name is None
             'create_repos_md': self.create_repos_md,
             'skip_sso_name': self.skip_sso_name,
             'unified_root': str(self.unified_root)
@@ -524,12 +638,28 @@ class SSOConfigGenerator:
         Returns:
             str: Extracted SSO name
         """
-        if not url and "default" in self.config:
-            url = self.config["default"].get("sso_start_url")
+        if not url:
+            # Try to get URL from config
+            if "sso-session sso" in self.config:
+                url = self.config["sso-session sso"].get("sso_start_url")
+            elif "default" in self.config:
+                url = self.config["default"].get("sso_start_url")
             
         if url:
-            # Extract domain from URL (e.g., 'company' from 'company.awsapps.com')
-            return url.split('//')[1].split('.')[0]
+            try:
+                # Extract domain from URL (e.g., 'company' from 'company.awsapps.com')
+                # Handle URLs like https://company.awsapps.com/start or https://d-12345.awsapps.com/start
+                domain = url.split('//')[1].split('.')[0]
+                
+                # If domain starts with 'd-' followed by numbers, it's a directory ID
+                # In that case, use a more generic name
+                if domain.startswith('d-') and domain[2:].isdigit():
+                    return "aws-sso"
+                    
+                return domain
+            except (IndexError, AttributeError):
+                # If URL parsing fails, fall back to default
+                pass
             
         return "default-sso"
             
@@ -542,7 +672,8 @@ class SSOConfigGenerator:
         Returns:
             str: Sanitized name
         """
-        return name.lower().replace(' ', '-')
+        # Replace spaces with hyphens but preserve case
+        return name.replace(' ', '-')
             
     def _validate_sso_access(self) -> bool:
         """Validate SSO access.
