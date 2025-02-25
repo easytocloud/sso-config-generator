@@ -43,9 +43,15 @@ jobs:
           echo "Semantic Release Output:"
           echo "$output"
           
-          # Check if there's a version to be released
-          if echo "$output" | grep -q "The next release version is"; then
-            version=$(echo "$output" | grep -oP 'The next release version is \K[0-9]+\.[0-9]+\.[0-9]+')
+          # Check for different patterns in the output
+          if echo "$output" | grep -q "Published release"; then
+            # Extract version from "Published release X.Y.Z on default channel"
+            version=$(echo "$output" | grep -oP 'Published release \K[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+            echo "new_release_version=$version" >> $GITHUB_OUTPUT
+            echo "Version to be released: $version"
+          elif echo "$output" | grep -q "next release version is"; then
+            # Extract version from "the next release version is X.Y.Z"
+            version=$(echo "$output" | grep -oP 'next release version is \K[0-9]+\.[0-9]+\.[0-9]+')
             echo "new_release_version=$version" >> $GITHUB_OUTPUT
             echo "Version to be released: $version"
           else
