@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/easytocloud/sso-config-generator/compare/v1.0.0...v1.0.1) (2025-02-25)
+
+
+### Bug Fixes
+
+* correct cache file handling and documentation ([0ddb3ca](https://github.com/easytocloud/sso-config-generator/commit/0ddb3caabbed28215b0e93e3875d3cad900a0e33))
+
 # 1.0.0 (2025-02-25)
 
 
