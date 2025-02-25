@@ -1,6 +1,6 @@
 """SSO Config Generator - Generate AWS SSO configuration and directory structures."""
 
-__version__ = "1.1.0"
+__version__ = "1.1.1"
 
 from .core import SSOConfigGenerator
 
