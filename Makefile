@@ -44,7 +44,11 @@ uv-install: uv-venv
 	uv pip install boto3 click pyyaml
 
 uv-run: uv-install
-	VIRTUAL_ENV=$(UV_VENV) PATH=$(UV_VENV)/bin:$$PATH AWS_DEFAULT_REGION=eu-west-1 python -m sso_config_generator.cli generate
+	VIRTUAL_ENV=$(UV_VENV) \
+	PATH=$(UV_VENV)/bin:$$PATH \
+	AWS_DEFAULT_REGION=eu-west-1 \
+	AWS_SSO_CACHE_PATH=$(HOME)/.aws/sso/cache \
+	python -m sso_config_generator.cli generate
 
 uv-clean:
 	rm -rf $(UV_VENV)

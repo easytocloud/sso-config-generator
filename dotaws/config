@@ -1,0 +1,5 @@
+
+[sso-session sso]
+sso_region = eu-west-1
+sso_start_url = https://hccloud.awsapps.com/start
+sso_registration_scopes = sso:account:access

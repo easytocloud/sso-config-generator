@@ -37,14 +37,19 @@ class SSOConfigGenerator:
         self.skip_sso_name = skip_sso_name
         self.unified_root = unified_root or os.path.expanduser("~/unified-environment")
         
-        # AWS clients
-        self.sso_client = boto3.client('sso')
-        self.org_client = boto3.client('organizations') if use_ou_structure else None
-        
         # Config paths
         self.aws_config_path = os.path.expanduser("~/.aws/config")
         self.ou_cache_path = os.path.expanduser("~/.aws/.ou")
+        self.sso_cache_dir = os.path.expanduser("~/.aws/sso/cache")
         self.config = configparser.ConfigParser()
+        
+        # AWS clients
+        self.session = boto3.Session()
+        self.sso_oidc = self.session.client('sso-oidc')
+        self.sso = self.session.client('sso')
+        self.org_client = None
+        self.use_ou_structure = use_ou_structure
+        self.access_token = None
         
     def generate(self) -> bool:
         """Generate AWS SSO configuration and directory structure.
@@ -92,8 +97,8 @@ class SSOConfigGenerator:
             
             # Check AWS config file exists
             if not os.path.exists(self.aws_config_path):
-                print("Error: AWS config file not found", file=sys.stderr)
-                return False
+                print("AWS config file not found, will be created during setup")
+                return True
                 
             # Validate SSO access
             if not self._validate_sso_access():
@@ -186,6 +191,59 @@ class SSOConfigGenerator:
             print(f"Error reading cache: {str(e)}", file=sys.stderr)
             return None
             
+    def _get_sso_token(self) -> Optional[str]:
+        """Get SSO token from cache.
+        
+        Returns:
+            Optional[str]: SSO token if found, None otherwise
+        """
+        try:
+            if not os.path.exists(self.sso_cache_dir):
+                return None
+                
+            # Find the most recent token file
+            token_files = [f for f in os.listdir(self.sso_cache_dir) if f.endswith('.json')]
+            if not token_files:
+                return None
+                
+            latest_file = max(token_files, key=lambda f: os.path.getmtime(os.path.join(self.sso_cache_dir, f)))
+            
+            with open(os.path.join(self.sso_cache_dir, latest_file)) as f:
+                cache_data = json.load(f)
+                if 'accessToken' in cache_data:
+                    return cache_data['accessToken']
+                    
+            return None
+            
+        except Exception:
+            return None
+            
+    def _ensure_sso_auth(self) -> bool:
+        """Ensure SSO authentication is valid.
+        
+        Returns:
+            bool: True if authenticated, False otherwise
+        """
+        try:
+            # Try to get token from cache first
+            self.access_token = self._get_sso_token()
+            if self.access_token:
+                try:
+                    # Test if token is valid
+                    self.sso.list_accounts(accessToken=self.access_token)
+                    return True
+                except Exception:
+                    self.access_token = None
+            
+            print("\nNo valid SSO session found. Please run:")
+            print("aws sso login")
+            print("\nThen try again.\n")
+            return False
+            
+        except Exception as e:
+            print(f"\nError checking SSO auth: {str(e)}\n")
+            return False
+
     def _build_accounts_cache(self) -> Optional[List[Dict]]:
         """Build account and OU structure cache.
         
@@ -195,24 +253,34 @@ class SSOConfigGenerator:
         try:
             print("Building OU structure cache...")
             
-            # Get root OU
-            roots = self.org_client.list_roots()['Roots']
-            if not roots:
-                raise Exception("No organization root found")
+            # Ensure SSO auth is valid
+            if not self._ensure_sso_auth():
+                return None
                 
-            root_id = roots[0]['Id']
-            
-            # Build OU tree
-            ou_tree = self._build_ou_tree(root_id)
+            # Initialize Organizations client if needed
+            if self.use_ou_structure:
+                self.org_client = self.session.client('organizations')
+                
+                # Get root OU
+                roots = self.org_client.list_roots()['Roots']
+                if not roots:
+                    raise Exception("No organization root found")
+                    
+                root_id = roots[0]['Id']
+                
+                # Build OU tree
+                ou_tree = self._build_ou_tree(root_id)
+            else:
+                ou_tree = None
             
             # Get all accounts
             accounts = []
-            paginator = self.sso_client.get_paginator('list_accounts')
+            paginator = self.sso.get_paginator('list_accounts')
             
-            for page in paginator.paginate():
+            for page in paginator.paginate(accessToken=self.access_token):
                 for account in page['accountList']:
-                    # Get account OU path
-                    ou_path = self._get_account_ou_path(account['accountId'])
+                    # Get account OU path if using OU structure
+                    ou_path = self._get_account_ou_path(account['accountId']) if self.use_ou_structure else "/"
                     roles = self._get_account_roles(account['accountId'])
                     
                     if roles:
@@ -311,9 +379,9 @@ class SSOConfigGenerator:
         """
         try:
             roles = []
-            paginator = self.sso_client.get_paginator('list_account_roles')
+            paginator = self.sso.get_paginator('list_account_roles')
             
-            for page in paginator.paginate(accountId=account_id):
+            for page in paginator.paginate(accountId=account_id, accessToken=self.access_token):
                 roles.extend([role['roleName'] for role in page['roleList']])
                 
             return roles
@@ -378,7 +446,8 @@ class SSOConfigGenerator:
         try:
             base_path = Path(self.unified_root)
             if not self.skip_sso_name:
-                base_path = base_path / self._sanitize_path(self.sso_name)
+                sso_name = self.sso_name or self._extract_sso_name()
+                base_path = base_path / self._sanitize_path(sso_name)
                 
             # Create base directory
             base_path.mkdir(parents=True, exist_ok=True)
@@ -482,8 +551,14 @@ class SSOConfigGenerator:
             bool: True if valid, False otherwise
         """
         try:
-            self.sso_client.list_accounts()
+            # Ensure we have a valid token
+            if not self._ensure_sso_auth():
+                return False
+                
+            # Test access with token
+            self.sso.list_accounts(accessToken=self.access_token)
             return True
+            
         except Exception as e:
             print(f"Error validating SSO access: {str(e)}", file=sys.stderr)
             return False
@@ -495,6 +570,11 @@ class SSOConfigGenerator:
             bool: True if valid, False otherwise
         """
         try:
+            # Skip role assumption test if config file doesn't exist
+            if not os.path.exists(self.aws_config_path):
+                print("AWS config file not found, skipping role assumption test")
+                return True
+                
             # Test first profile in config
             self.config.read(self.aws_config_path)
             for section in self.config.sections():
@@ -506,8 +586,9 @@ class SSOConfigGenerator:
                     sts.get_caller_identity()
                     return True
                     
-            print("No profiles found to test", file=sys.stderr)
-            return False
+            # No profiles found but that's okay for initial setup
+            print("No profiles found to test, continuing with setup")
+            return True
             
         except Exception as e:
             print(f"Error testing role assumption: {str(e)}", file=sys.stderr)
