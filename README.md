@@ -83,7 +83,7 @@ This will:
 - Create `.envrc` files in each account directory with AdministratorAccess role
 - Use OU structure for directory organization (cached for performance)
 
-The tool caches OU structure information in `~/.aws/.ou` to improve performance. When the cache exists, it will be used automatically with a notification. To rebuild the cache:
+The tool caches OU structure information in the same directory as your AWS config file to improve performance. When the cache exists, it will be used automatically with a notification. To rebuild the cache:
 
 ```bash
 uvx sso-config-generator --rebuild-cache
