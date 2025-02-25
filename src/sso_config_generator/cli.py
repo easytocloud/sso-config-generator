@@ -1,5 +1,6 @@
 import os
 import sys
+from typing import Optional
 import click
 from . import __version__
 from .core import SSOConfigGenerator
@@ -20,19 +21,30 @@ def cli():
 @click.option('--skip-sso-name', is_flag=True, help='Do not use the SSO name in the path')
 @click.option('--unified-root', help='Use different root for unified environment')
 def generate(create_directories: bool, use_ou_structure: bool, developer_role_name: str,
-            sso_name: str, create_repos_md: bool, skip_sso_name: bool, unified_root: str,
+            sso_name: Optional[str], create_repos_md: bool, skip_sso_name: bool, unified_root: Optional[str],
             rebuild_cache: bool):
     """Generate AWS SSO configuration and directory structure.
     
     This command will:
     1. Generate AWS CLI config file with SSO profiles
-    2. Create directory structure (optional)
-    3. Set up environment files for direnv
+    2. Create directory structure using OU hierarchy (default)
+    3. Set up environment files for direnv with AdministratorAccess role
+    
+    The tool uses a cache file (~/.aws/.ou) to store the OU structure for better performance.
+    Use --rebuild-cache to force a refresh of the OU structure.
     
     Example usage:
-        sso-config-generator generate --create-directories
-        sso-config-generator generate --create-directories --use-ou-structure
+        # Basic usage (uses defaults)
+        sso-config-generator generate
+        
+        # Force rebuild of OU cache
+        sso-config-generator generate --rebuild-cache
+        
+        # Use different role
         sso-config-generator generate --developer-role-name DevRole
+        
+        # Disable OU structure
+        sso-config-generator generate --no-use-ou-structure
     """
     try:
         # Remove cache if rebuild requested
