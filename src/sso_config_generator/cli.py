@@ -36,7 +36,7 @@ def cli(create_directories: bool, use_ou_structure: bool, developer_role_name: s
     2. Create directory structure using OU hierarchy (if --use-ou-structure)
     3. Set up environment files (.envrc) for direnv with the specified role
     
-    The tool uses a cache file (~/.aws/.ou) to store the OU structure and account information.
+    The tool uses a cache file in the same directory as your AWS config file to store the OU structure and account information.
     Use --rebuild-cache to force a refresh of the cache.
     
     Example usage:
@@ -70,10 +70,15 @@ def cli(create_directories: bool, use_ou_structure: bool, developer_role_name: s
         else:
             # Remove cache if rebuild requested
             if rebuild_cache:
-                cache_path = os.path.expanduser("~/.aws/.ou")
+                # Get the AWS config path from environment or default
+                aws_config_path = os.environ.get('AWS_CONFIG_FILE', os.path.expanduser("~/.aws/config"))
+                # Store cache in the same directory as the config file
+                config_dir = os.path.dirname(aws_config_path)
+                cache_path = os.path.join(config_dir, ".ou")
+                
                 if os.path.exists(cache_path):
                     os.remove(cache_path)
-                    print("Removed existing OU cache.")
+                    print(f"Removed existing OU cache at {cache_path}")
             
             # Generate configuration
             generator = SSOConfigGenerator(
