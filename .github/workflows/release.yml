@@ -65,6 +65,22 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release --initial-version 2025.1.0
 
+      - name: Update Version in Files
+        if: steps.semantic.outputs.new_release_version != ''
+        run: |
+          # Update version in __init__.py
+          sed -i "s/__version__ = \".*\"/__version__ = \"${{ steps.semantic.outputs.new_release_version }}\"/" src/sso_config_generator/__init__.py
+          
+          # Update version in pyproject.toml
+          sed -i "s/version = \".*\"/version = \"${{ steps.semantic.outputs.new_release_version }}\"/" pyproject.toml
+          
+          # Commit the version updates
+          git config --local user.email "github-actions@github.com"
+          git config --local user.name "GitHub Actions"
+          git add src/sso_config_generator/__init__.py pyproject.toml
+          git commit -m "chore: update version to ${{ steps.semantic.outputs.new_release_version }} [skip ci]"
+          git push
+
       - name: Build package
         if: steps.semantic.outputs.new_release_version != ''
         env:
