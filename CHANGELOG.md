@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/easytocloud/sso-config-generator/compare/v1.0.2...v1.1.0) (2025-02-25)
+
+
+### Features
+
+* align version to 1.0.2 and add automated version updates ([70af946](https://github.com/easytocloud/sso-config-generator/commit/70af94672e75c1b3c4efd3117385f7bc1ac42bb0))
+
 ## [1.0.2](https://github.com/easytocloud/sso-config-generator/compare/v1.0.1...v1.0.2) (2025-02-25)
 
 
