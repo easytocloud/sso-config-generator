@@ -1,0 +1,57 @@
+# SSO Config Generator - Development Guidelines
+
+## Project Overview
+- Python CLI tool for generating AWS SSO configuration and directory structures
+- Simplifies AWS SSO configuration management by generating config files and directory structures
+- Designed to work with direnv for automatic profile switching
+
+## Key Components
+- `core.py`: Main implementation of SSOConfigGenerator class
+- `cli.py`: Command-line interface using Click
+- `version.py`: Single source of truth for version information
+
+## Design Patterns
+- Class-based implementation with clear separation of concerns
+- Configuration caching for performance optimization
+- Hierarchical directory structure mirroring AWS Organizations
+
+## Configuration Handling
+- AWS config file is modified with a managed block between markers:
+  ```
+  # BEGIN SSO-CONFIG-GENERATOR MANAGED BLOCK
+  # END SSO-CONFIG-GENERATOR MANAGED BLOCK
+  ```
+- OU structure is cached in `.ou` file in the same directory as AWS config
+- Generator config is stored in `.generate-sso-config` in the base directory
+
+## AWS SSO Integration
+- Uses boto3 for AWS API interactions
+- Supports both legacy and newer sso-session configuration formats
+- Extracts SSO name from SSO start URL for directory naming
+
+## Environment Detection
+- Automatically detects Cloud9/CloudX environments
+- If current directory is named "environment", SSO name is automatically skipped
+- Supports unified root directory for all account directories
+
+## Versioning
+- Uses semantic versioning
+- Version is stored in `version.py` and imported by `__init__.py`
+- Automated versioning via GitHub workflow and semantic-release
+
+## Command Conventions
+- Use `uvx sso-config-generator` to run the tool (uv package manager)
+- All boolean flags have both positive and negative forms (e.g., `--use-ou-structure/--no-use-ou-structure`)
+
+## Common Issues
+- "Error: You must specify a region" - Set AWS_DEFAULT_REGION or configure in ~/.aws/config
+- "Unable to locate credentials" - Run `aws sso login` to refresh SSO credentials
+- "SSO session is expired" - Run `aws sso login` to start a new session
+
+## Development Workflow
+- Install in development mode: `pip install -e .`
+- Build package: `pip install build && python -m build`
+- Test changes: `./test_sso_config.sh`
+- Commit messages follow conventional commits for automated versioning:
+  - `feat:` - Minor version increment
+  - `fix:`, `docs:`, etc. - Patch version increment
