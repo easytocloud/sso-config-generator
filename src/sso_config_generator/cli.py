@@ -2,7 +2,7 @@ import os
 import sys
 from typing import Optional
 import click
-from . import __version__
+from .version import __version__
 from .core import SSOConfigGenerator
 
 @click.command()

@@ -1,3 +1,9 @@
+# 1.2.0 (2025-03-04)
+
+### Features
+
+* add automatic detection of Cloud9/CloudX environments ([bc9a001](https://github.com/easytocloud/sso-config-generator/commit/bc9a001339d6be3d94886b317e65906e6c23d1bd))
+
 # 1.0.0 (2025-03-04)
 
 
@@ -18,12 +24,6 @@
 * Initial commit with SSO config generator functionality ([cf15ef4](https://github.com/easytocloud/sso-config-generator/commit/cf15ef40c0bf51bcd069a129d95c4c3d5a473dcb))
 * simplify CLI interface and improve directory handling ([51bae4b](https://github.com/easytocloud/sso-config-generator/commit/51bae4b302df270dde44c6edd8baa21c08bc4c8d))
 * simplify CLI interface and improve directory handling ([bbe818a](https://github.com/easytocloud/sso-config-generator/commit/bbe818aea4a43aae7911c7f4f780fd2645cb7ddc))
-
-# 1.1.2 (2025-03-04)
-
-### Features
-
-* add automatic detection of Cloud9/CloudX environments ([0b2bfa3](https://github.com/easytocloud/sso-config-generator/commit/0b2bfa34380f753580668757db1ed1f7bccdd434))
 
 # 1.0.0 (2025-02-25)
 

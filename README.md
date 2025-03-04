@@ -192,6 +192,24 @@ pip install -e .
 - Run the tool: `uvx sso-config-generator`
 - Test changes: `./test_sso_config.sh`
 
+### Versioning
+
+This project uses [semantic-release](https://github.com/semantic-release/semantic-release) for automated versioning and package publishing. The version is stored in a single source of truth:
+
+- `src/sso_config_generator/version.py`: Contains the `__version__` variable
+- `__init__.py` imports this version
+- `pyproject.toml` is updated automatically by the GitHub workflow
+
+When a commit is pushed to the main branch, the GitHub workflow:
+1. Determines the next version based on commit messages
+2. Creates a GitHub release and tag
+3. Updates the version in version.py and pyproject.toml
+4. Publishes the package to PyPI
+
+To trigger specific version increments, use the following commit message prefixes:
+- `feat:` - Minor version increment (e.g., 1.1.0 -> 1.2.0)
+- `fix:`, `docs:`, `style:`, etc. - Patch version increment (e.g., 1.1.0 -> 1.1.1)
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
