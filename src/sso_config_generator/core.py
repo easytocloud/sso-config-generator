@@ -495,7 +495,7 @@ class SSOConfigGenerator:
             # Add profile for each account/role combination
             for account in accounts:
                 for role in account['roles']:
-                    profile_name = f"{role}@{account['name']}"
+                    profile_name = f"{role}@{self._sanitize_path(account['name'])}"
                     config[f"profile {profile_name}"] = {
                         'sso_session': 'sso',
                         'sso_account_id': account['id'],
@@ -582,7 +582,7 @@ class SSOConfigGenerator:
                 # Create .envrc file
                 role_name = self.developer_role_name or account['roles'][0]
                 if role_name in account['roles']:
-                    self._create_envrc_file(account_path, f"{role_name}@{account['name']}")
+                    self._create_envrc_file(account_path, f"{role_name}@{self._sanitize_path(account['name'])}")
                     
                 # Create repos.md if requested
                 if self.create_repos_md:
@@ -685,8 +685,8 @@ class SSOConfigGenerator:
         Returns:
             str: Sanitized name
         """
-        # Replace spaces with hyphens but preserve case
-        return name.replace(' ', '-')
+        # Replace spaces with underscores but preserve case
+        return name.replace(' ', '_')
             
     def _validate_sso_access(self) -> bool:
         """Validate SSO access.
