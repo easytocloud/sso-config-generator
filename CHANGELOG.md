@@ -1,3 +1,9 @@
+# 1.1.2 (2025-03-04)
+
+### Features
+
+* add automatic detection of Cloud9/CloudX environments ([0b2bfa3](https://github.com/easytocloud/sso-config-generator/commit/0b2bfa34380f753580668757db1ed1f7bccdd434))
+
 # 1.0.0 (2025-02-25)
 
 

@@ -35,12 +35,25 @@ class SSOConfigGenerator:
         self.sso_name = sso_name
         self.create_repos_md = create_repos_md
         
+        # Check for Cloud9/CloudX environment
+        home_dir = os.path.expanduser("~")
+        current_dir = os.getcwd()
+        environment_dir = os.path.join(home_dir, "environment")
+        
+        # If we're in home directory and an 'environment' subdirectory exists
+        if current_dir == home_dir and os.path.isdir(environment_dir):
+            print("\n=== Cloud9/CloudX environment detected ===")
+            print(f"Changing directory to: {environment_dir}\n")
+            os.chdir(environment_dir)
+            # Update current directory after changing
+            current_dir = environment_dir
+        
         # Set unified_root with proper default (current directory)
-        self.unified_root = unified_root or os.getcwd()
+        self.unified_root = unified_root or current_dir
         
         # Handle skip_sso_name logic
         # If current directory is named 'environment', automatically skip SSO name
-        if os.path.basename(os.getcwd()) == 'environment' and unified_root is None:
+        if os.path.basename(current_dir) == 'environment' and unified_root is None:
             self.skip_sso_name = True
         else:
             # Otherwise respect the provided flag
@@ -175,7 +188,7 @@ class SSOConfigGenerator:
             
             # Otherwise prompt for information
             start_url = input("Enter SSO start URL: ").strip()
-            region = input("Enter SSO region [us-east-1]: ").strip() or "us-east-1"
+            region = input("Enter SSO region [eu-west-1]: ").strip() or "eu-west-1"
             sso_name = self._extract_sso_name(start_url)
             print(f"Extracted SSO name: {sso_name}")
             

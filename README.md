@@ -53,6 +53,15 @@ Before using the tool, ensure you have:
    aws sso login
    ```
 
+### Cloud9/CloudX Integration
+
+When running in AWS Cloud9 or CloudX environments, the tool will automatically:
+1. Detect if you're in your home directory with an "environment" subdirectory
+2. Change to the "environment" directory
+3. Skip the SSO name in the directory structure
+
+This ensures seamless operation in AWS-provided development environments.
+
 ### Troubleshooting
 
 1. "Error: You must specify a region"
