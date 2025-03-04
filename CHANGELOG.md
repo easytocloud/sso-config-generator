@@ -1,3 +1,10 @@
+## [1.2.3](https://github.com/easytocloud/sso-config-generator/compare/v1.2.2...v1.2.3) (2025-03-04)
+
+
+### Bug Fixes
+
+* handle blanks in account_names better ([98f5748](https://github.com/easytocloud/sso-config-generator/commit/98f574877450757c8aae41809c5a97275a8559ad))
+
 ## [1.2.2](https://github.com/easytocloud/sso-config-generator/compare/v1.2.1...v1.2.2) (2025-03-04)
 
 
