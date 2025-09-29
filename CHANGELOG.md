@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/easytocloud/sso-config-generator/compare/v1.2.5...v1.3.0) (2025-09-29)
+
+
+### Features
+
+* add region parameter support ([76f724c](https://github.com/easytocloud/sso-config-generator/commit/76f724c18d13b373927beeb554e70f1a4eac32f1))
+
 ## [1.2.5](https://github.com/easytocloud/sso-config-generator/compare/v1.2.4...v1.2.5) (2025-09-29)
 
 ## [1.2.4](https://github.com/easytocloud/sso-config-generator/compare/v1.2.3...v1.2.4) (2025-03-04)
