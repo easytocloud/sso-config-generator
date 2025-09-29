@@ -65,7 +65,8 @@ This ensures seamless operation in AWS-provided development environments.
 ### Troubleshooting
 
 1. "Error: You must specify a region"
-   - Set AWS_DEFAULT_REGION environment variable
+   - Use the `--region` flag: `uvx sso-config-generator --region us-east-1`
+   - Or set AWS_DEFAULT_REGION environment variable
    - Or configure default region in ~/.aws/config
 
 2. "Unable to locate credentials"
@@ -115,6 +116,7 @@ Options:
                                                (default: current directory)
                                                If current directory is named "environment", SSO name is
                                                automatically skipped
+  --region REGION                              AWS region to use (default: eu-west-1)
   --validate                                   Validate current AWS SSO configuration instead of generating
   --help                                       Show this message and exit
   --version                                    Show the version and exit
@@ -137,7 +139,12 @@ uvx sso-config-generator --no-use-ou-structure
 uvx sso-config-generator --developer-role-name ReadOnlyAccess
 ```
 
-4. Force rebuild of OU cache:
+4. Use specific AWS region:
+```bash
+uvx sso-config-generator --region us-east-1
+```
+
+5. Force rebuild of OU cache:
 ```bash
 uvx sso-config-generator --rebuild-cache
 ```

@@ -17,9 +17,10 @@ class SSOConfigGenerator:
                  sso_name: Optional[str] = None,
                  create_repos_md: bool = False,
                  skip_sso_name: bool = False,
-                 unified_root: Optional[str] = None):
+                 unified_root: Optional[str] = None,
+                 region: str = "eu-west-1"):
         """Initialize the SSO Config Generator.
-        
+
         Args:
             create_directories: Whether to create directory structure
             use_ou_structure: Whether to use OU structure in directories
@@ -28,12 +29,14 @@ class SSOConfigGenerator:
             create_repos_md: Whether to create repos.md files
             skip_sso_name: Whether to skip SSO name in paths
             unified_root: Custom root directory for unified environment
+            region: AWS region to use (default: eu-west-1)
         """
         self.create_directories = create_directories
         self.use_ou_structure = use_ou_structure
         self.developer_role_name = developer_role_name
         self.sso_name = sso_name
         self.create_repos_md = create_repos_md
+        self.region = region
         
         # Check for Cloud9/CloudX environment
         home_dir = os.path.expanduser("~")
@@ -70,7 +73,7 @@ class SSOConfigGenerator:
         self.config = configparser.ConfigParser()
         
         # AWS clients
-        self.session = boto3.Session()
+        self.session = boto3.Session(region_name=self.region)
         self.sso_oidc = self.session.client('sso-oidc')
         self.sso = self.session.client('sso')
         self.org_client = None
@@ -487,7 +490,7 @@ class SSOConfigGenerator:
             # Add SSO session section if it doesn't exist in the before_marker
             if "[sso-session sso]" not in before_marker:
                 config['sso-session sso'] = {
-                    'sso_region': sso_info['region'],
+                    'sso_region': self.region,
                     'sso_start_url': sso_info['start_url'],
                     'sso_registration_scopes': 'sso:account:access'
                 }
@@ -500,7 +503,7 @@ class SSOConfigGenerator:
                         'sso_session': 'sso',
                         'sso_account_id': account['id'],
                         'sso_role_name': role,
-                        'region': sso_info['region']
+                        'region': self.region
                     }
             
             # Convert config to string

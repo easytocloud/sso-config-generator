@@ -26,9 +26,11 @@ from .core import SSOConfigGenerator
                    'If current directory is named "environment", SSO name is automatically skipped.')
 @click.option('--validate', is_flag=True,
               help='Validate current AWS SSO configuration instead of generating')
+@click.option('--region', default='eu-west-1',
+              help='AWS region to use (default: eu-west-1)')
 def cli(create_directories: bool, use_ou_structure: bool, developer_role_name: str,
         sso_name: Optional[str], create_repos_md: bool, skip_sso_name: bool, unified_root: Optional[str],
-        rebuild_cache: bool, validate: bool):
+        rebuild_cache: bool, validate: bool, region: str):
     """SSO Config Generator - Generate AWS SSO configuration and directory structures.
     
     This tool will:
@@ -48,7 +50,10 @@ def cli(create_directories: bool, use_ou_structure: bool, developer_role_name: s
         
         # Use different role for .envrc files
         sso-config-generator --developer-role-name ReadOnlyAccess
-        
+
+        # Use specific region
+        sso-config-generator --region us-east-1
+
         # Disable OU structure (flat account directories)
         sso-config-generator --no-use-ou-structure
         
@@ -64,7 +69,7 @@ def cli(create_directories: bool, use_ou_structure: bool, developer_role_name: s
     try:
         if validate:
             # Run validation
-            generator = SSOConfigGenerator()
+            generator = SSOConfigGenerator(region=region)
             if not generator.validate():
                 sys.exit(1)
         else:
@@ -88,7 +93,8 @@ def cli(create_directories: bool, use_ou_structure: bool, developer_role_name: s
                 sso_name=sso_name,
                 create_repos_md=create_repos_md,
                 skip_sso_name=skip_sso_name,
-                unified_root=unified_root
+                unified_root=unified_root,
+                region=region
             )
             
             if not generator.generate():
