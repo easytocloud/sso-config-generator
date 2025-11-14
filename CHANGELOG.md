@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/easytocloud/sso-config-generator/compare/v1.3.0...v1.3.1) (2025-11-14)
+
+
+### Bug Fixes
+
+* runs with reduced permissions ([3036f03](https://github.com/easytocloud/sso-config-generator/commit/3036f03fd698cff3df35a1ab4e8987dc29a44c5b))
+
 # [1.3.0](https://github.com/easytocloud/sso-config-generator/compare/v1.2.5...v1.3.0) (2025-09-29)
 
 
