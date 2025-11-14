@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/easytocloud/sso-config-generator/compare/v1.3.1...v1.4.0) (2025-11-14)
+
+
+### Features
+
+* add removal of config.needed ([e6fe0d5](https://github.com/easytocloud/sso-config-generator/commit/e6fe0d58b0f979d0889df56ab6ab22e295fae2c3))
+
 ## [1.3.1](https://github.com/easytocloud/sso-config-generator/compare/v1.3.0...v1.3.1) (2025-11-14)
 
 
