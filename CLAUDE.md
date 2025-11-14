@@ -8,6 +8,18 @@ This is a Python CLI tool that generates AWS SSO configuration and directory str
 
 ## Development Commands
 
+### Required AWS Profile Baseline
+Always ensure local workspaces have the following profile in `~/.aws/config` before running commands or tests:
+
+```
+[profile sso-browser]
+sso_session = sso
+region = eu-west-1
+output = json
+```
+
+Most examples assume `aws sso login --profile sso-browser` has been executed and that cached credentials exist for subsequent CLI calls.
+
 ### Package Management
 - **Install in development mode**: `pip install -e .`
 - **Build package**: `pip install build && python -m build`

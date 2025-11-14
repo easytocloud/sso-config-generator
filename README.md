@@ -28,12 +28,27 @@ It also creates a directory structure that mirrors your AWS Organization, making
 ## Profile Naming Convention
 Profiles are named using the following convention:
 
-```<RoleName>@<AccountName>
+```
+<RoleName>@<AccountName>
 ```
 For example, if you have access to the `AdministratorAccess` role in the `DevAccount`, the profile will be named:
 
-```AdministratorAccess@DevAccount
 ```
+AdministratorAccess@DevAccount
+```
+
+## Required SSO Browser Profile
+
+All commands in this repo assume your `~/.aws/config` contains a reusable profile that points at your SSO session. Make sure this exact block exists (adjust the region only if your SSO region differs):
+
+```
+[profile sso-browser]
+sso_session = sso
+region = eu-west-1
+output = json
+```
+
+Run `aws sso login --profile sso-browser` before invoking `sso-config-generator` so the CLI can reuse the cached credentials.
 
 ## Overview
 
@@ -72,7 +87,7 @@ Before using the tool, ensure you have:
    # - SSO Region
    # - SSO registration scopes (accept default)
    ```
-   or manually edit `~/.aws/config` to look like this:
+   or manually edit `~/.aws/config` to look like this (the `[profile sso-browser]` block must match the one described in the **Required SSO Browser Profile** section):
    ```
    [sso-session sso]
    sso_region = eu-west-1

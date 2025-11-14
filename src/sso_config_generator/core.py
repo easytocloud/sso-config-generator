@@ -80,6 +80,7 @@ class SSOConfigGenerator:
         self.org_client = None
         self.use_ou_structure = use_ou_structure
         self.access_token = None
+        self.config_needed_flag = os.path.expanduser("~/.aws/config.needed")
         
     def generate(self) -> bool:
         """Generate AWS SSO configuration and directory structure.
@@ -111,6 +112,7 @@ class SSOConfigGenerator:
             if self.create_directories:
                 if not self._create_directory_structure(accounts):
                     return False
+            self._clear_config_needed_flag()
                     
             print("\nSSO configuration generated successfully!")
             return True
@@ -300,8 +302,8 @@ class SSOConfigGenerator:
                 except Exception:
                     self.access_token = None
             
-            print("\nNo valid SSO session found. Please run:")
-            print("aws sso login")
+            print("\nNo valid SSO session found. Please run:\n")
+            print("aws sso login --profile sso-browser")
             print("\nThen try again.\n")
             return False
             
@@ -613,6 +615,15 @@ class SSOConfigGenerator:
         except Exception as e:
             print(f"Error creating directory structure: {str(e)}", file=sys.stderr)
             return False
+
+    def _clear_config_needed_flag(self) -> None:
+        """Remove ~/.aws/config.needed if it exists."""
+        try:
+            if os.path.exists(self.config_needed_flag):
+                os.remove(self.config_needed_flag)
+                print(f"Removed {self.config_needed_flag}")
+        except OSError as exc:
+            print(f"Warning: unable to remove {self.config_needed_flag}: {exc}")
             
     def _store_generator_config(self, base_path: Path, actual_sso_name: str = None) -> None:
         """Store generator configuration for future updates.

@@ -21,6 +21,13 @@
   # BEGIN SSO-CONFIG-GENERATOR MANAGED BLOCK
   # END SSO-CONFIG-GENERATOR MANAGED BLOCK
   ```
+- All environments must include the reusable SSO browser profile below inside `~/.aws/config` (adjust region only if needed):
+  ```
+  [profile sso-browser]
+  sso_session = sso
+  region = eu-west-1
+  output = json
+  ```
 - OU structure is cached in `.ou` file in the same directory as AWS config
 - Generator config is stored in `.generate-sso-config` in the base directory
 
