@@ -5,6 +5,7 @@ import boto3
 import yaml
 import datetime
 import configparser
+from botocore.exceptions import ClientError
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -323,17 +324,30 @@ class SSOConfigGenerator:
                 
             # Initialize Organizations client if needed
             if self.use_ou_structure:
-                self.org_client = self.session.client('organizations')
-                
-                # Get root OU
-                roots = self.org_client.list_roots()['Roots']
-                if not roots:
-                    raise Exception("No organization root found")
-                    
-                root_id = roots[0]['Id']
-                
-                # Build OU tree
-                ou_tree = self._build_ou_tree(root_id)
+                try:
+                    self.org_client = self.session.client('organizations')
+                    roots = self.org_client.list_roots()['Roots']
+                    if not roots:
+                        raise Exception("No organization root found")
+                    root_id = roots[0]['Id']
+                    ou_tree = self._build_ou_tree(root_id)
+                except ClientError as err:
+                    error_code = err.response.get('Error', {}).get('Code')
+                    if error_code in {"AccessDeniedException", "AccessDenied"}:
+                        print("\nAccess denied while reading AWS Organizations (ListRoots)."
+                              " Falling back to flat directory layout.\n")
+                    else:
+                        print(f"\nUnable to read AWS Organizations data ({error_code})."
+                              " Falling back to flat directory layout.\n")
+                    self.use_ou_structure = False
+                    self.org_client = None
+                    ou_tree = None
+                except Exception as err:
+                    print(f"\nUnexpected error while building OU tree: {err}"
+                          "\nFalling back to flat directory layout.\n")
+                    self.use_ou_structure = False
+                    self.org_client = None
+                    ou_tree = None
             else:
                 ou_tree = None
             
@@ -407,6 +421,9 @@ class SSOConfigGenerator:
         Returns:
             str: OU path for the account
         """
+        if not self.org_client:
+            return "/"
+
         try:
             parents = self.org_client.list_parents(ChildId=account_id)['Parents']
             if not parents:

@@ -1,6 +1,39 @@
 # SSO Config Generator
 
-A Python CLI tool for generating AWS SSO configuration and directory structures.
+A Python CLI tool for generating AWS CLI configuration and directory structures.
+
+## The issue it solves
+
+In a large organization with multiple AWS accounts, managing access via AWS SSO can become cumbersome. You may have access to many roles across various accounts, and switching between them manually can be error-prone and time-consuming.
+
+sso-config-generator creates a profile for each AWS Role you have access to via AWS SSO. After logging in to an sso session, you can use the profiles in your AWS CLI commands, SDKs, and tools like Terraform.
+
+```bash
+aws sso login --profile sso-browser
+```
+The login command opens a browser window for authentication. After successful login, you can use the generated profiles like this:
+
+```bash
+aws s3 ls --profile my-profile-name
+```
+or set the `AWS_PROFILE` (or `AWS_DEFAULT_PROFILE`) environment variable:
+
+```bash
+export AWS_PROFILE=my-profile-name
+aws s3 ls
+```
+
+It also creates a directory structure that mirrors your AWS Organization, making it easy to navigate and manage multiple AWS accounts. Each account directory contains a `.envrc` file (for use with `direnv`) that sets the `AWS_PROFILE` environment variable to the appropriate profile for that account, so that cd-ing into the directory automatically switches to the correct AWS profile.
+
+## Profile Naming Convention
+Profiles are named using the following convention:
+
+```<RoleName>@<AccountName>
+```
+For example, if you have access to the `AdministratorAccess` role in the `DevAccount`, the profile will be named:
+
+```AdministratorAccess@DevAccount
+```
 
 ## Overview
 
@@ -12,7 +45,7 @@ SSO Config Generator is a standalone Python tool that simplifies AWS SSO configu
 
 ## Installation
 
-You can install SSO Config Generator using pip:
+You can install sso-config-generator via pip, or use it directly without installation using `uvx`. 
 
 ```bash
 pip install sso-config-generator
@@ -30,27 +63,31 @@ pip install sso-config-generator
 
 Before using the tool, ensure you have:
 
-1. Set your AWS region:
+1. Configure AWS SSO:
+   Either run:
    ```bash
-   # Either in ~/.aws/config
-   [default]
-   region = eu-west-1
-
-   # Or via environment variable
-   export AWS_DEFAULT_REGION=eu-west-1
-   ```
-
-2. Configure AWS SSO:
-   ```bash
-   # Configure SSO
    aws configure sso
    # Follow the prompts to enter:
    # - SSO start URL (e.g., https://your-domain.awsapps.com/start)
    # - SSO Region
    # - SSO registration scopes (accept default)
-   
+   ```
+   or manually edit `~/.aws/config` to look like this:
+   ```
+   [sso-session sso]
+   sso_region = eu-west-1
+   sso_start_url = https://YOUR_DOMAIN.awsapps.com/start
+   sso_registration_scopes = sso:account:access
+
+   [profile sso-browser]
+   sso_session = sso
+   output = json
+   region = eu-west-1
+   ```
+2. Login to AWS SSO:
+   ```bash
    # Login to SSO to create credentials
-   aws sso login
+   aws sso login --profile sso-browser
    ```
 
 ### Cloud9/CloudX Integration
@@ -88,7 +125,7 @@ uvx sso-config-generator
 ```
 
 This will:
-- Create/update your AWS CLI config file (`~/.aws/config`)
+- Update your AWS CLI config file (`~/.aws/config`)
 - Generate a directory structure in the current directory + sso-name
 - Create `.envrc` files in each account directory with AdministratorAccess role
 - Use OU structure for directory organization (cached for performance)
