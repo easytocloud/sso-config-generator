@@ -1,6 +1,6 @@
 [project]
 name = "sso-config-generator"
-version = "1.4.0"
+version = "1.4.1"
 description = "Python tool for generating AWS SSO configuration and directory structure"
 authors = [
     {name = "easytocloud", email = "info@easytocloud.com"}
