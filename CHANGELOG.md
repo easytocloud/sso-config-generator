@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/easytocloud/sso-config-generator/compare/v1.5.4...v1.6.0) (2026-03-27)
+
+
+### Features
+
+* add --sso-session-name option for multiple concurrent SSO sessions ([fefa537](https://github.com/easytocloud/sso-config-generator/commit/fefa537921f5a91672e9b65d33c153b987d79d9a))
+
 ## [1.5.4](https://github.com/easytocloud/sso-config-generator/compare/v1.5.3...v1.5.4) (2026-03-27)
 
 
