@@ -145,7 +145,10 @@ This will:
 - Create `.envrc` files in each account directory with AdministratorAccess role
 - Use OU structure for directory organization (cached for performance)
 
-The tool caches OU structure information in the same directory as your AWS config file to improve performance. When the cache exists, it will be used automatically with a notification. To rebuild the cache:
+The tool caches OU structure information in the same directory as your AWS config file to improve performance.
+Cache files are organization-scoped using the SSO start URL domain prefix (for example `https://my-easytocloud.awsapps.com/start` uses the cache key `my-easytocloud`).
+If a cache file is older than 7 days, it is ignored and rebuilt automatically.
+To force a full cache rebuild:
 
 ```bash
 uvx sso-config-generator --rebuild-cache

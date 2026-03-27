@@ -4,9 +4,11 @@ import json
 import boto3
 import yaml
 import datetime
+import re
 import configparser
 from botocore.exceptions import ClientError
 from pathlib import Path
+from urllib.parse import urlparse
 from typing import Dict, List, Optional, Tuple
 
 class SSOConfigGenerator:
@@ -68,8 +70,9 @@ class SSOConfigGenerator:
         self.aws_credentials_path = os.environ.get('AWS_SHARED_CREDENTIALS_FILE', os.path.expanduser("~/.aws/credentials"))
         
         # Store cache in the same directory as the config file
-        config_dir = os.path.dirname(self.aws_config_path)
-        self.ou_cache_path = os.path.join(config_dir, ".ou")
+        self.config_dir = os.path.dirname(self.aws_config_path)
+        self.cache_max_age = datetime.timedelta(days=7)
+        self.ou_cache_path = os.path.join(self.config_dir, ".ou.default-sso.json")
         self.sso_cache_dir = os.path.expanduser("~/.aws/sso/cache")  # This is used by AWS CLI, so we keep it as is
         self.config = configparser.ConfigParser()
         
@@ -92,12 +95,13 @@ class SSOConfigGenerator:
             print("\n=== Generating SSO Configuration ===\n")
             print(f"Using AWS config file: {self.aws_config_path}")
             print(f"Using AWS credentials file: {self.aws_credentials_path}")
-            print(f"Using OU cache file: {self.ou_cache_path}")
             
             # Get SSO information
             sso_info = self._get_sso_info()
             if not sso_info:
                 return False
+
+            print(f"Using OU cache file: {self.ou_cache_path}")
                 
             # Get account and role information
             accounts = self._get_accounts()
@@ -169,6 +173,7 @@ class SSOConfigGenerator:
                 
                 start_url = self.config["sso-session sso"].get("sso_start_url")
                 sso_name = self._extract_sso_name(start_url)
+                self._set_ou_cache_path(start_url)
                 print(f"Extracted SSO name: {sso_name}")
                 
                 return {
@@ -184,6 +189,7 @@ class SSOConfigGenerator:
                 
                 start_url = self.config["default"].get("sso_start_url")
                 sso_name = self._extract_sso_name(start_url)
+                self._set_ou_cache_path(start_url)
                 print(f"Extracted SSO name: {sso_name}")
                 
                 return {
@@ -196,6 +202,7 @@ class SSOConfigGenerator:
             start_url = input("Enter SSO start URL: ").strip()
             region = input("Enter SSO region [eu-west-1]: ").strip() or "eu-west-1"
             sso_name = self._extract_sso_name(start_url)
+            self._set_ou_cache_path(start_url)
             print(f"Extracted SSO name: {sso_name}")
             
             return {
@@ -217,6 +224,15 @@ class SSOConfigGenerator:
         try:
             # Check if cache exists and should be used
             if os.path.exists(self.ou_cache_path):
+                if self._is_cache_expired(self.ou_cache_path):
+                    print(f"\nFound OU cache at {self.ou_cache_path}, but it is older than 7 days.")
+                    print("Ignoring stale cache and rebuilding.\n")
+                    try:
+                        os.remove(self.ou_cache_path)
+                    except OSError:
+                        pass
+                    return self._build_accounts_cache()
+
                 print("\nFound OU cache, using cached data.")
                 print("Use --rebuild-cache to refresh the OU structure.\n")
                 return self._get_accounts_from_cache()
@@ -257,6 +273,55 @@ class SSOConfigGenerator:
         except Exception as e:
             print(f"Error reading cache: {str(e)}", file=sys.stderr)
             return None
+
+    def _set_ou_cache_path(self, start_url: Optional[str]) -> None:
+        """Set the OU cache path based on organization identifier in SSO start URL."""
+        cache_key = self._extract_cache_key(start_url)
+        self.ou_cache_path = os.path.join(self.config_dir, f".ou.{cache_key}.json")
+
+    def _extract_cache_key(self, start_url: Optional[str]) -> str:
+        """Extract cache key from SSO URL (prefix before awsapps.com)."""
+        if start_url:
+            try:
+                hostname = (urlparse(start_url).hostname or "").lower()
+                if hostname.endswith(".awsapps.com"):
+                    org_prefix = hostname[:-len(".awsapps.com")]
+                    if org_prefix:
+                        return re.sub(r"[^A-Za-z0-9._-]", "-", org_prefix)
+            except Exception:
+                pass
+
+        sso_name = self._extract_sso_name(start_url)
+        # Keep cache filename safe and predictable.
+        return re.sub(r"[^A-Za-z0-9._-]", "-", sso_name)
+
+    def _is_cache_expired(self, cache_path: str) -> bool:
+        """Return True when cache file is older than configured max age."""
+        try:
+            modified_at = datetime.datetime.fromtimestamp(os.path.getmtime(cache_path))
+            return datetime.datetime.now() - modified_at > self.cache_max_age
+        except OSError:
+            return True
+
+    def clear_ou_cache_files(self) -> int:
+        """Remove OU cache files from AWS config directory.
+
+        Returns:
+            int: Number of removed cache files.
+        """
+        removed = 0
+        try:
+            for file_name in os.listdir(self.config_dir):
+                is_legacy_cache = file_name == ".ou"
+                is_namespaced_cache = file_name.startswith(".ou.") and file_name.endswith(".json")
+                if is_legacy_cache or is_namespaced_cache:
+                    cache_file = os.path.join(self.config_dir, file_name)
+                    os.remove(cache_file)
+                    removed += 1
+        except OSError:
+            return removed
+
+        return removed
             
     def _get_sso_token(self) -> Optional[str]:
         """Get SSO token from cache.

@@ -1,4 +1,3 @@
-import os
 import sys
 from typing import Optional
 import click
@@ -38,7 +37,8 @@ def cli(create_directories: bool, use_ou_structure: bool, developer_role_name: s
     2. Create directory structure using OU hierarchy (if --use-ou-structure)
     3. Set up environment files (.envrc) for direnv with the specified role
     
-    The tool uses a cache file in the same directory as your AWS config file to store the OU structure and account information.
+    The tool uses organization-scoped cache files in the same directory as your AWS config file
+    to store OU structure and account information.
     Use --rebuild-cache to force a refresh of the cache.
     
     Example usage:
@@ -73,19 +73,6 @@ def cli(create_directories: bool, use_ou_structure: bool, developer_role_name: s
             if not generator.validate():
                 sys.exit(1)
         else:
-            # Remove cache if rebuild requested
-            if rebuild_cache:
-                # Get the AWS config path from environment or default
-                aws_config_path = os.environ.get('AWS_CONFIG_FILE', os.path.expanduser("~/.aws/config"))
-                # Store cache in the same directory as the config file
-                config_dir = os.path.dirname(aws_config_path)
-                cache_path = os.path.join(config_dir, ".ou")
-                
-                if os.path.exists(cache_path):
-                    os.remove(cache_path)
-                    print(f"Removed existing OU cache at {cache_path}")
-            
-            # Generate configuration
             generator = SSOConfigGenerator(
                 create_directories=create_directories,
                 use_ou_structure=use_ou_structure,
@@ -96,6 +83,14 @@ def cli(create_directories: bool, use_ou_structure: bool, developer_role_name: s
                 unified_root=unified_root,
                 region=region
             )
+
+            # Remove cache if rebuild requested
+            if rebuild_cache:
+                removed_count = generator.clear_ou_cache_files()
+                if removed_count:
+                    print(f"Removed {removed_count} OU cache file(s)")
+                else:
+                    print("No OU cache files found to remove")
             
             if not generator.generate():
                 sys.exit(1)
