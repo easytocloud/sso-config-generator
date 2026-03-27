@@ -1,3 +1,10 @@
+## [1.4.2](https://github.com/easytocloud/sso-config-generator/compare/v1.4.1...v1.4.2) (2026-03-27)
+
+
+### Bug Fixes
+
+* scope OU cache per organization and expire after 7 days ([a198ee7](https://github.com/easytocloud/sso-config-generator/commit/a198ee7f72cf2647dcc17ec79b082b898372090e))
+
 ## [1.4.1](https://github.com/easytocloud/sso-config-generator/compare/v1.4.0...v1.4.1) (2025-11-14)
 
 # [1.4.0](https://github.com/easytocloud/sso-config-generator/compare/v1.3.1...v1.4.0) (2025-11-14)
