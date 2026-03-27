@@ -395,13 +395,18 @@ class SSOConfigGenerator:
                             continue
                         
                         # Check if token is not expired
-                        # expiresAt is typically in milliseconds since epoch
                         expires_at = cache_data.get('expiresAt')
                         if expires_at:
-                            if isinstance(expires_at, (int, float)):
+                            if isinstance(expires_at, str):
+                                # ISO 8601 format (e.g. "2026-03-27T18:33:12Z")
+                                expires_dt = datetime.datetime.fromisoformat(expires_at.replace('Z', '+00:00'))
+                            elif isinstance(expires_at, (int, float)):
+                                # Milliseconds since epoch
                                 expires_dt = datetime.datetime.fromtimestamp(expires_at / 1000, datetime.timezone.utc)
-                                if now > expires_dt:
-                                    continue
+                            else:
+                                continue
+                            if now > expires_dt:
+                                continue
                         
                         # Return the accessToken from the matching, non-expired file
                         if 'accessToken' in cache_data:
@@ -432,7 +437,7 @@ class SSOConfigGenerator:
                     return True
                 except Exception:
                     self.access_token = None
-            
+
             print("\nNo valid SSO session found. Please run:\n")
             print("aws sso login --profile sso-browser")
             print("\nThen try again.\n")
