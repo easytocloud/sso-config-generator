@@ -1,3 +1,10 @@
+## [1.5.4](https://github.com/easytocloud/sso-config-generator/compare/v1.5.3...v1.5.4) (2026-03-27)
+
+
+### Bug Fixes
+
+* search SSO tokens only in ~/.aws/sso/cache (always consistent location) ([1eb4e00](https://github.com/easytocloud/sso-config-generator/commit/1eb4e00c362d944303087ef592fa5ce207949173))
+
 ## [1.5.3](https://github.com/easytocloud/sso-config-generator/compare/v1.5.2...v1.5.3) (2026-03-27)
 
 
