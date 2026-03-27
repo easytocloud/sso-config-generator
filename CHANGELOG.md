@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/easytocloud/sso-config-generator/compare/v1.4.2...v1.5.0) (2026-03-27)
+
+
+### Features
+
+* explicitly use sso-browser profile for all AWS APIs and document required IAM permissions ([6d4fd57](https://github.com/easytocloud/sso-config-generator/commit/6d4fd57b3c5f009522176fea97061102de3e3d9e))
+
 ## [1.4.2](https://github.com/easytocloud/sso-config-generator/compare/v1.4.1...v1.4.2) (2026-03-27)
 
 
