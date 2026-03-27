@@ -73,7 +73,8 @@ class SSOConfigGenerator:
         self.config_dir = os.path.dirname(self.aws_config_path)
         self.cache_max_age = datetime.timedelta(days=7)
         self.ou_cache_path = os.path.join(self.config_dir, ".ou.default-sso.json")
-        self.sso_cache_dir = os.path.expanduser("~/.aws/sso/cache")  # For SSO token cache
+        # SSO token cache follows AWS config directory (important for AWS_ENV scenarios)
+        self.sso_cache_dir = os.path.join(self.config_dir, "sso", "cache")
         self.config = configparser.ConfigParser()
         
         # AWS clients - use sso-browser profile for all AWS API calls
@@ -329,25 +330,33 @@ class SSOConfigGenerator:
         
         Note: SSO APIs require explicit access tokens, unlike sigv4-signed services.
         This extracts the token from the sso-browser profile's cached token.
+        Supports both AWS_ENV custom paths and standard ~/.aws/sso/cache locations.
         
         Returns:
             Optional[str]: SSO access token if found, None otherwise
         """
         try:
-            if not os.path.exists(self.sso_cache_dir):
-                return None
-                
-            # Find the most recent token file
-            token_files = [f for f in os.listdir(self.sso_cache_dir) if f.endswith('.json')]
-            if not token_files:
-                return None
-                
-            latest_file = max(token_files, key=lambda f: os.path.getmtime(os.path.join(self.sso_cache_dir, f)))
+            # Try config-directory-relative cache first (AWS_ENV scenarios)
+            cache_dirs = [self.sso_cache_dir]
+            # Fall back to standard location for backward compatibility
+            if self.sso_cache_dir != os.path.expanduser("~/.aws/sso/cache"):
+                cache_dirs.append(os.path.expanduser("~/.aws/sso/cache"))
             
-            with open(os.path.join(self.sso_cache_dir, latest_file)) as f:
-                cache_data = json.load(f)
-                if 'accessToken' in cache_data:
-                    return cache_data['accessToken']
+            for cache_dir in cache_dirs:
+                if not os.path.exists(cache_dir):
+                    continue
+                    
+                # Find the most recent token file
+                token_files = [f for f in os.listdir(cache_dir) if f.endswith('.json')]
+                if not token_files:
+                    continue
+                    
+                latest_file = max(token_files, key=lambda f: os.path.getmtime(os.path.join(cache_dir, f)))
+                
+                with open(os.path.join(cache_dir, latest_file)) as f:
+                    cache_data = json.load(f)
+                    if 'accessToken' in cache_data:
+                        return cache_data['accessToken']
                     
             return None
             
