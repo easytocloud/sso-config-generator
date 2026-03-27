@@ -1,3 +1,10 @@
+## [1.5.1](https://github.com/easytocloud/sso-config-generator/compare/v1.5.0...v1.5.1) (2026-03-27)
+
+
+### Bug Fixes
+
+* restore SSO token handling for SSO API calls requiring explicit accessToken ([96f37d9](https://github.com/easytocloud/sso-config-generator/commit/96f37d916c49fd6ae18a6657128ab58fee30fac0))
+
 # [1.5.0](https://github.com/easytocloud/sso-config-generator/compare/v1.4.2...v1.5.0) (2026-03-27)
 
 
