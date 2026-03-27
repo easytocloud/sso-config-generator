@@ -1,3 +1,10 @@
+## [1.5.3](https://github.com/easytocloud/sso-config-generator/compare/v1.5.2...v1.5.3) (2026-03-27)
+
+
+### Bug Fixes
+
+* search for SSO token matching startUrl and expiration instead of most recent file ([6c5ca1f](https://github.com/easytocloud/sso-config-generator/commit/6c5ca1f6a6e2f61f5e5ce101d2ff6e8b3d051ab5))
+
 ## [1.5.2](https://github.com/easytocloud/sso-config-generator/compare/v1.5.1...v1.5.2) (2026-03-27)
 
 
