@@ -21,7 +21,8 @@ class SSOConfigGenerator:
                  create_repos_md: bool = False,
                  skip_sso_name: bool = False,
                  unified_root: Optional[str] = None,
-                 region: str = "eu-west-1"):
+                 region: str = "eu-west-1",
+                 sso_session_name: Optional[str] = None):
         """Initialize the SSO Config Generator.
 
         Args:
@@ -33,6 +34,7 @@ class SSOConfigGenerator:
             skip_sso_name: Whether to skip SSO name in paths
             unified_root: Custom root directory for unified environment
             region: AWS region to use (default: eu-west-1)
+            sso_session_name: Name for the SSO session section (default: sso)
         """
         self.create_directories = create_directories
         self.use_ou_structure = use_ou_structure
@@ -40,7 +42,8 @@ class SSOConfigGenerator:
         self.sso_name = sso_name
         self.create_repos_md = create_repos_md
         self.region = region
-        
+        self._explicit_sso_session_name = sso_session_name
+
         # Check for Cloud9/CloudX environment
         home_dir = os.path.expanduser("~")
         current_dir = os.getcwd()
@@ -74,6 +77,10 @@ class SSOConfigGenerator:
         self.cache_max_age = datetime.timedelta(days=7)
         self.ou_cache_path = os.path.join(self.config_dir, ".ou.default-sso.json")
         self.config = configparser.ConfigParser()
+
+        # Resolve SSO session name: auto-detect from config if not explicitly provided
+        self.sso_session_name = self._resolve_sso_session_name(self._explicit_sso_session_name)
+        self.sso_session_section = f"sso-session {self.sso_session_name}"
         
         # AWS clients - use sso-browser profile for all AWS API calls
         # Note: SSO services require explicit accessToken, Organizations uses sigv4
@@ -85,6 +92,27 @@ class SSOConfigGenerator:
         self.access_token = None
         self.config_needed_flag = os.path.expanduser("~/.aws/config.needed")
         
+    def _resolve_sso_session_name(self, explicit_name: Optional[str]) -> str:
+        """Resolve the SSO session name to use.
+
+        If an explicit name was provided, use it. Otherwise, read the config
+        file and auto-detect: if exactly one sso-session section exists, use
+        its name. Falls back to 'sso' if no sections are found.
+        """
+        if explicit_name is not None:
+            return explicit_name
+
+        config = configparser.ConfigParser()
+        config.read(self.aws_config_path)
+        sso_sessions = [s for s in config.sections() if s.startswith("sso-session ")]
+
+        if len(sso_sessions) == 1:
+            name = sso_sessions[0].removeprefix("sso-session ")
+            print(f"Auto-detected SSO session name: {name}")
+            return name
+
+        return "sso"
+
     def generate(self) -> bool:
         """Generate AWS SSO configuration and directory structure.
         
@@ -165,20 +193,20 @@ class SSOConfigGenerator:
             self.config.read(self.aws_config_path)
             
             # First check for sso-session section
-            if "sso-session sso" in self.config:
+            if self.sso_session_section in self.config:
                 # Debug output
-                print(f"Found sso-session sso section in config file")
-                print(f"sso_start_url: {self.config['sso-session sso'].get('sso_start_url')}")
-                print(f"sso_region: {self.config['sso-session sso'].get('sso_region')}")
-                
-                start_url = self.config["sso-session sso"].get("sso_start_url")
+                print(f"Found {self.sso_session_section} section in config file")
+                print(f"sso_start_url: {self.config[self.sso_session_section].get('sso_start_url')}")
+                print(f"sso_region: {self.config[self.sso_session_section].get('sso_region')}")
+
+                start_url = self.config[self.sso_session_section].get("sso_start_url")
                 sso_name = self._extract_sso_name(start_url)
                 self._set_ou_cache_path(start_url)
                 print(f"Extracted SSO name: {sso_name}")
                 
                 return {
                     "start_url": start_url,
-                    "region": self.config["sso-session sso"].get("sso_region"),
+                    "region": self.config[self.sso_session_section].get("sso_region"),
                     "name": self.sso_name or sso_name
                 }
             # Then check default section
@@ -339,14 +367,14 @@ class SSOConfigGenerator:
             self.config.read(self.aws_config_path)
             start_url = None
             
-            if "sso-session sso" in self.config:
-                start_url = self.config["sso-session sso"].get("sso_start_url")
+            if self.sso_session_section in self.config:
+                start_url = self.config[self.sso_session_section].get("sso_start_url")
             elif "default" in self.config:
                 start_url = self.config["default"].get("sso_start_url")
-            
+
             if not start_url:
                 return None
-            
+
             # SSO tokens are always cached in ~/.aws/sso/cache/ 
             cache_dir = os.path.expanduser("~/.aws/sso/cache")
             if not os.path.exists(cache_dir):
@@ -613,8 +641,8 @@ class SSOConfigGenerator:
             config = configparser.ConfigParser()
             
             # Add SSO session section if it doesn't exist in the before_marker
-            if "[sso-session sso]" not in before_marker:
-                config['sso-session sso'] = {
+            if f"[{self.sso_session_section}]" not in before_marker:
+                config[self.sso_session_section] = {
                     'sso_region': self.region,
                     'sso_start_url': sso_info['start_url'],
                     'sso_registration_scopes': 'sso:account:access'
@@ -625,7 +653,7 @@ class SSOConfigGenerator:
                 for role in account['roles']:
                     profile_name = f"{role}@{self._sanitize_path(account['name'])}"
                     config[f"profile {profile_name}"] = {
-                        'sso_session': 'sso',
+                        'sso_session': self.sso_session_name,
                         'sso_account_id': account['id'],
                         'sso_role_name': role,
                         'region': self.region
@@ -671,8 +699,8 @@ class SSOConfigGenerator:
             if not self.skip_sso_name:
                 # Get SSO info to get the name
                 self.config.read(self.aws_config_path)
-                if "sso-session sso" in self.config:
-                    start_url = self.config["sso-session sso"].get("sso_start_url")
+                if self.sso_session_section in self.config:
+                    start_url = self.config[self.sso_session_section].get("sso_start_url")
                     sso_name = self._extract_sso_name(start_url)
                 else:
                     sso_name = self.sso_name or self._extract_sso_name()
@@ -741,8 +769,8 @@ class SSOConfigGenerator:
         # If actual_sso_name is not provided, try to extract it from the config file
         if not actual_sso_name:
             self.config.read(self.aws_config_path)
-            if "sso-session sso" in self.config:
-                start_url = self.config["sso-session sso"].get("sso_start_url")
+            if self.sso_session_section in self.config:
+                start_url = self.config[self.sso_session_section].get("sso_start_url")
                 actual_sso_name = self._extract_sso_name(start_url)
         
         config = {
@@ -790,8 +818,8 @@ class SSOConfigGenerator:
         """
         if not url:
             # Try to get URL from config
-            if "sso-session sso" in self.config:
-                url = self.config["sso-session sso"].get("sso_start_url")
+            if self.sso_session_section in self.config:
+                url = self.config[self.sso_session_section].get("sso_start_url")
             elif "default" in self.config:
                 url = self.config["default"].get("sso_start_url")
             

@@ -27,9 +27,13 @@ from .core import SSOConfigGenerator
               help='Validate current AWS SSO configuration instead of generating')
 @click.option('--region', default='eu-west-1',
               help='AWS region to use (default: eu-west-1)')
+@click.option('--sso-session-name', default=None,
+              help='Name for the SSO session section in AWS config. '
+                   'Auto-detected from existing config if not specified, falls back to "sso". '
+                   'Use different names to run multiple SSO environments side by side.')
 def cli(create_directories: bool, use_ou_structure: bool, developer_role_name: str,
         sso_name: Optional[str], create_repos_md: bool, skip_sso_name: bool, unified_root: Optional[str],
-        rebuild_cache: bool, validate: bool, region: str):
+        rebuild_cache: bool, validate: bool, region: str, sso_session_name: Optional[str]):
     """SSO Config Generator - Generate AWS SSO configuration and directory structures.
     
     This tool will:
@@ -69,7 +73,7 @@ def cli(create_directories: bool, use_ou_structure: bool, developer_role_name: s
     try:
         if validate:
             # Run validation
-            generator = SSOConfigGenerator(region=region)
+            generator = SSOConfigGenerator(region=region, sso_session_name=sso_session_name)
             if not generator.validate():
                 sys.exit(1)
         else:
@@ -81,7 +85,8 @@ def cli(create_directories: bool, use_ou_structure: bool, developer_role_name: s
                 create_repos_md=create_repos_md,
                 skip_sso_name=skip_sso_name,
                 unified_root=unified_root,
-                region=region
+                region=region,
+                sso_session_name=sso_session_name
             )
 
             # Remove cache if rebuild requested
