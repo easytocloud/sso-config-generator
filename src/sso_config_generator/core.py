@@ -330,33 +330,56 @@ class SSOConfigGenerator:
         
         Note: SSO APIs require explicit access tokens, unlike sigv4-signed services.
         This extracts the token from the sso-browser profile's cached token.
-        Supports both AWS_ENV custom paths and standard ~/.aws/sso/cache locations.
+        Searches for a token matching our sso_start_url that is not expired.
         
         Returns:
             Optional[str]: SSO access token if found, None otherwise
         """
         try:
-            # Try config-directory-relative cache first (AWS_ENV scenarios)
-            cache_dirs = [self.sso_cache_dir]
-            # Fall back to standard location for backward compatibility
-            if self.sso_cache_dir != os.path.expanduser("~/.aws/sso/cache"):
-                cache_dirs.append(os.path.expanduser("~/.aws/sso/cache"))
+            # Get our sso_start_url from config
+            self.config.read(self.aws_config_path)
+            start_url = None
             
-            for cache_dir in cache_dirs:
-                if not os.path.exists(cache_dir):
+            if "sso-session sso" in self.config:
+                start_url = self.config["sso-session sso"].get("sso_start_url")
+            elif "default" in self.config:
+                start_url = self.config["default"].get("sso_start_url")
+            
+            if not start_url:
+                return None
+            
+            # Search cache directory for a token matching our start_url that's not expired
+            if not os.path.exists(self.sso_cache_dir):
+                return None
+            
+            now = datetime.datetime.now(datetime.timezone.utc)
+            
+            for token_file in os.listdir(self.sso_cache_dir):
+                if not token_file.endswith('.json'):
                     continue
-                    
-                # Find the most recent token file
-                token_files = [f for f in os.listdir(cache_dir) if f.endswith('.json')]
-                if not token_files:
-                    continue
-                    
-                latest_file = max(token_files, key=lambda f: os.path.getmtime(os.path.join(cache_dir, f)))
                 
-                with open(os.path.join(cache_dir, latest_file)) as f:
-                    cache_data = json.load(f)
-                    if 'accessToken' in cache_data:
-                        return cache_data['accessToken']
+                try:
+                    with open(os.path.join(self.sso_cache_dir, token_file)) as f:
+                        cache_data = json.load(f)
+                        
+                        # Check if this token is for our sso_start_url
+                        if cache_data.get('startUrl') != start_url:
+                            continue
+                        
+                        # Check if token is not expired
+                        # expiresAt is typically in milliseconds since epoch
+                        expires_at = cache_data.get('expiresAt')
+                        if expires_at:
+                            if isinstance(expires_at, (int, float)):
+                                expires_dt = datetime.datetime.fromtimestamp(expires_at / 1000, datetime.timezone.utc)
+                                if now > expires_dt:
+                                    continue
+                        
+                        # Return the accessToken from the matching, non-expired file
+                        if 'accessToken' in cache_data:
+                            return cache_data['accessToken']
+                except (json.JSONDecodeError, IOError):
+                    continue
                     
             return None
             
