@@ -73,8 +73,6 @@ class SSOConfigGenerator:
         self.config_dir = os.path.dirname(self.aws_config_path)
         self.cache_max_age = datetime.timedelta(days=7)
         self.ou_cache_path = os.path.join(self.config_dir, ".ou.default-sso.json")
-        # SSO token cache follows AWS config directory (important for AWS_ENV scenarios)
-        self.sso_cache_dir = os.path.join(self.config_dir, "sso", "cache")
         self.config = configparser.ConfigParser()
         
         # AWS clients - use sso-browser profile for all AWS API calls
@@ -330,6 +328,7 @@ class SSOConfigGenerator:
         
         Note: SSO APIs require explicit access tokens, unlike sigv4-signed services.
         This extracts the token from the sso-browser profile's cached token.
+        SSO tokens are always cached in ~/.aws/sso/cache/ regardless of AWS_CONFIG_FILE.
         Searches for a token matching our sso_start_url that is not expired.
         
         Returns:
@@ -348,18 +347,19 @@ class SSOConfigGenerator:
             if not start_url:
                 return None
             
-            # Search cache directory for a token matching our start_url that's not expired
-            if not os.path.exists(self.sso_cache_dir):
+            # SSO tokens are always cached in ~/.aws/sso/cache/ 
+            cache_dir = os.path.expanduser("~/.aws/sso/cache")
+            if not os.path.exists(cache_dir):
                 return None
             
             now = datetime.datetime.now(datetime.timezone.utc)
             
-            for token_file in os.listdir(self.sso_cache_dir):
+            for token_file in os.listdir(cache_dir):
                 if not token_file.endswith('.json'):
                     continue
                 
                 try:
-                    with open(os.path.join(self.sso_cache_dir, token_file)) as f:
+                    with open(os.path.join(cache_dir, token_file)) as f:
                         cache_data = json.load(f)
                         
                         # Check if this token is for our sso_start_url
