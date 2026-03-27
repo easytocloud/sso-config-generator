@@ -73,14 +73,17 @@ class SSOConfigGenerator:
         self.config_dir = os.path.dirname(self.aws_config_path)
         self.cache_max_age = datetime.timedelta(days=7)
         self.ou_cache_path = os.path.join(self.config_dir, ".ou.default-sso.json")
+        self.sso_cache_dir = os.path.expanduser("~/.aws/sso/cache")  # For SSO token cache
         self.config = configparser.ConfigParser()
         
         # AWS clients - use sso-browser profile for all AWS API calls
+        # Note: SSO services require explicit accessToken, Organizations uses sigv4
         self.session = boto3.Session(profile_name='sso-browser', region_name=self.region)
         self.sso_oidc = self.session.client('sso-oidc')
         self.sso = self.session.client('sso')
         self.org_client = None
         self.use_ou_structure = use_ou_structure
+        self.access_token = None
         self.config_needed_flag = os.path.expanduser("~/.aws/config.needed")
         
     def generate(self) -> bool:
@@ -321,23 +324,62 @@ class SSOConfigGenerator:
 
         return removed
             
+    def _get_sso_token(self) -> Optional[str]:
+        """Get SSO token from cache.
+        
+        Note: SSO APIs require explicit access tokens, unlike sigv4-signed services.
+        This extracts the token from the sso-browser profile's cached token.
+        
+        Returns:
+            Optional[str]: SSO access token if found, None otherwise
+        """
+        try:
+            if not os.path.exists(self.sso_cache_dir):
+                return None
+                
+            # Find the most recent token file
+            token_files = [f for f in os.listdir(self.sso_cache_dir) if f.endswith('.json')]
+            if not token_files:
+                return None
+                
+            latest_file = max(token_files, key=lambda f: os.path.getmtime(os.path.join(self.sso_cache_dir, f)))
+            
+            with open(os.path.join(self.sso_cache_dir, latest_file)) as f:
+                cache_data = json.load(f)
+                if 'accessToken' in cache_data:
+                    return cache_data['accessToken']
+                    
+            return None
+            
+        except Exception:
+            return None
+            
     def _ensure_sso_auth(self) -> bool:
         """Ensure SSO authentication is valid via sso-browser profile.
+        
+        SSO APIs require explicit access tokens, so we extract from the cache.
         
         Returns:
             bool: True if authenticated, False otherwise
         """
         try:
-            # Test SSO access using the sso-browser profile
-            self.sso.list_accounts()
-            return True
+            # Try to get token from cache first
+            self.access_token = self._get_sso_token()
+            if self.access_token:
+                try:
+                    # Test if token is valid
+                    self.sso.list_accounts(accessToken=self.access_token)
+                    return True
+                except Exception:
+                    self.access_token = None
+            
+            print("\nNo valid SSO session found. Please run:\n")
+            print("aws sso login --profile sso-browser")
+            print("\nThen try again.\n")
+            return False
             
         except Exception as e:
-            print(f"\nAuthentication failed with sso-browser profile: {str(e)}")
-            print("\nPlease ensure:")
-            print("  1. sso-browser profile is configured in ~/.aws/config")
-            print("  2. Run: aws sso login --profile sso-browser")
-            print("  3. Verify credentials: aws sts get-caller-identity --profile sso-browser\n")
+            print(f"\nError checking SSO auth: {str(e)}\n")
             return False
 
     def _build_accounts_cache(self) -> Optional[List[Dict]]:
@@ -385,11 +427,11 @@ class SSOConfigGenerator:
             else:
                 ou_tree = None
             
-            # Get all accounts using sso-browser profile
+            # Get all accounts using sso-browser profile (requires explicit token for SSO APIs)
             accounts = []
             paginator = self.sso.get_paginator('list_accounts')
             
-            for page in paginator.paginate():
+            for page in paginator.paginate(accessToken=self.access_token):
                 for account in page['accountList']:
                     # Get account OU path if using OU structure
                     ou_path = self._get_account_ou_path(account['accountId']) if self.use_ou_structure else "/"
@@ -496,7 +538,7 @@ class SSOConfigGenerator:
             roles = []
             paginator = self.sso.get_paginator('list_account_roles')
             
-            for page in paginator.paginate(accountId=account_id):
+            for page in paginator.paginate(accountId=account_id, accessToken=self.access_token):
                 roles.extend([role['roleName'] for role in page['roleList']])
                 
             return roles
@@ -762,8 +804,8 @@ class SSOConfigGenerator:
             if not self._ensure_sso_auth():
                 return False
                 
-            # Test access with profile
-            self.sso.list_accounts()
+            # Test access with token
+            self.sso.list_accounts(accessToken=self.access_token)
             return True
             
         except Exception as e:
