@@ -1,3 +1,10 @@
+## [1.5.2](https://github.com/easytocloud/sso-config-generator/compare/v1.5.1...v1.5.2) (2026-03-27)
+
+
+### Bug Fixes
+
+* respect AWS_CONFIG_FILE for SSO token cache directory lookup ([b84b400](https://github.com/easytocloud/sso-config-generator/commit/b84b4003ef080578dba31ed6e687b2417995a6c1))
+
 ## [1.5.1](https://github.com/easytocloud/sso-config-generator/compare/v1.5.0...v1.5.1) (2026-03-27)
 
 
