@@ -1,3 +1,10 @@
+## [1.6.1](https://github.com/easytocloud/sso-config-generator/compare/v1.6.0...v1.6.1) (2026-03-27)
+
+
+### Bug Fixes
+
+* properly parse ISO 8601 expiresAt in SSO token cache ([4d2112b](https://github.com/easytocloud/sso-config-generator/commit/4d2112b861e94736456a1b8a0baa1230e4903a36))
+
 # [1.6.0](https://github.com/easytocloud/sso-config-generator/compare/v1.5.4...v1.6.0) (2026-03-27)
 
 
