@@ -39,16 +39,56 @@ AdministratorAccess@DevAccount
 
 ## Required SSO Browser Profile
 
-All commands in this repo assume your `~/.aws/config` contains a reusable profile that points at your SSO session. Make sure this exact block exists (adjust the region only if your SSO region differs):
+All commands in this repo assume your `~/.aws/config` contains a reusable profile that points at your SSO session in the Organization Management Account. Make sure this block exists (adjust the region, account ID, and role name as needed):
 
 ```
 [profile sso-browser]
 sso_session = sso
+sso_account_id = 123456789012          # Your Organization Management Account ID
+sso_role_name = OrganizationAccountRole # Role name with Organizations permissions
 region = eu-west-1
 output = json
 ```
 
 Run `aws sso login --profile sso-browser` before invoking `sso-config-generator` so the CLI can reuse the cached credentials.
+
+### One-Time Setup: sso-browser Profile Configuration
+
+The `sso-browser` profile is used to retrieve both SSO account information and AWS Organization structure. For full functionality (including OU hierarchy), the SSO role must have the necessary IAM permissions.
+
+**Role Setup:**
+1. In your AWS SSO console, assign a role to your user account in your **Organization Management Account** (master account)
+2. The role name in SSO should match the `sso_role_name` you configured in the `sso-browser` profile (e.g., `OrganizationAccountRole`)
+3. In your Organization Management Account, create or update the IAM role with the following trust relationship (for SSO):
+   - Trust the SSO service in your region
+4. Attach the following permissions policy to the IAM role:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "sso:ListAccounts",
+        "sso:ListAccountRoles",
+        "organizations:ListRoots",
+        "organizations:ListOrganizationalUnitsForParent",
+        "organizations:DescribeOrganizationalUnit",
+        "organizations:ListParents"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+**Alternative:** Instead of creating a custom role, you can use the AWS managed policy `OrganizationsReadOnlyAccess` which includes all the required permissions.
+
+After setting up the role in SSO, run:
+```bash
+aws sso login --profile sso-browser
+```
 
 ## Overview
 
@@ -96,6 +136,8 @@ Before using the tool, ensure you have:
 
    [profile sso-browser]
    sso_session = sso
+   sso_account_id = 123456789012
+   sso_role_name = OrganizationAccountRole
    output = json
    region = eu-west-1
    ```
