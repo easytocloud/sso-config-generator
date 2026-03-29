@@ -711,7 +711,7 @@ class SSOConfigGenerator:
                 self.config.read(self.aws_config_path)
                 if self.sso_session_section in self.config:
                     start_url = self.config[self.sso_session_section].get("sso_start_url")
-                    sso_name = self._extract_sso_name(start_url)
+                    sso_name = self.sso_name or self._extract_sso_name(start_url)
                 else:
                     sso_name = self.sso_name or self._extract_sso_name()
                 
