@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/easytocloud/sso-config-generator/compare/v1.8.0...v1.8.1) (2026-03-29)
+
+
+### Bug Fixes
+
+* honour --sso-name override when sso-session section exists in config ([60928ab](https://github.com/easytocloud/sso-config-generator/commit/60928abde948e41f1ba029c765173a2857adb680))
+
 # [1.8.0](https://github.com/easytocloud/sso-config-generator/compare/v1.7.1...v1.8.0) (2026-03-29)
 
 
