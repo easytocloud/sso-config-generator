@@ -1,3 +1,10 @@
+## [1.8.2](https://github.com/easytocloud/sso-config-generator/compare/v1.8.1...v1.8.2) (2026-03-29)
+
+
+### Bug Fixes
+
+* rebuild cache when use_ou_structure=true but cache was built flat ([b791b14](https://github.com/easytocloud/sso-config-generator/commit/b791b14ddd012831b9617914c4667b3e437bee6e))
+
 ## [1.8.1](https://github.com/easytocloud/sso-config-generator/compare/v1.8.0...v1.8.1) (2026-03-29)
 
 
