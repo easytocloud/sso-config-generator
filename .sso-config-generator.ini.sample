@@ -1,0 +1,75 @@
+# sso-config-generator configuration file
+#
+# Copy this file to ~/.sso-config-generator.ini for user-wide defaults, or to
+# .sso-config-generator.ini in a project directory to override them for that
+# directory.  Command-line flags always take precedence over both files.
+#
+# Precedence order (highest to lowest):
+#   1. command-line flags
+#   2. ./.sso-config-generator.ini  (current working directory)
+#   3. ~/.sso-config-generator.ini  (home directory)
+#
+# Boolean values accept: true / false / yes / no / 1 / 0
+# Keys may use underscores or hyphens interchangeably.
+
+[sso-config-generator]
+
+# ---------------------------------------------------------------------------
+# Authentication
+# ---------------------------------------------------------------------------
+
+# AWS profile used to authenticate against SSO and (optionally) AWS Organizations.
+# The profile must have an sso_session reference in ~/.aws/config.
+profile = sso-browser
+
+# AWS region.
+region = eu-west-1
+
+# Name of the [sso-session ...] section in ~/.aws/config.
+# Leave unset to auto-detect (used when exactly one sso-session section exists)
+# or to fall back to the name "sso".
+# sso_session_name = sso
+
+# Override the SSO name extracted from the SSO start URL.
+# Rarely needed; useful when the URL does not contain a recognisable short name.
+# sso_name =
+
+# ---------------------------------------------------------------------------
+# Directory structure
+# ---------------------------------------------------------------------------
+
+# Create a local directory tree with one directory per account.
+# .envrc creation (below) requires this to be true.
+create_directories = false
+
+# Nest account directories under their OU hierarchy.
+# Requires create_directories = true.
+use_ou_structure = false
+
+# Root directory under which the account tree is created.
+# Defaults to the current working directory when not set.
+# unified_root =
+
+# Do not create a top-level directory named after the SSO organisation.
+skip_sso_name = false
+
+# ---------------------------------------------------------------------------
+# Per-account files
+# ---------------------------------------------------------------------------
+
+# Role name to export in a .envrc file (for direnv) inside each account directory.
+# Requires create_directories = true.
+# When not set, no .envrc files are created.
+developer_role_name = DeveloperAccess
+
+# Create a repos.md placeholder file in each account directory.
+create_repos_md = false
+
+# ---------------------------------------------------------------------------
+# Cache
+# ---------------------------------------------------------------------------
+
+# Force a full refresh of the OU / account cache on every run.
+# Normally you would pass --rebuild-cache on the command line rather than
+# enabling this permanently.
+rebuild_cache = false

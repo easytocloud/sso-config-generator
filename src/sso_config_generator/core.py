@@ -8,33 +8,34 @@ import re
 import configparser
 from botocore.exceptions import ClientError
 from pathlib import Path
-from urllib.parse import urlparse
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
 class SSOConfigGenerator:
     """Main class for generating AWS SSO configuration and directory structures."""
     
-    def __init__(self, create_directories: bool = True,
-                 use_ou_structure: bool = True,
-                 developer_role_name: str = "AdministratorAccess",
+    def __init__(self, create_directories: bool = False,
+                 use_ou_structure: bool = False,
+                 developer_role_name: Optional[str] = None,
                  sso_name: Optional[str] = None,
                  create_repos_md: bool = False,
                  skip_sso_name: bool = False,
                  unified_root: Optional[str] = None,
                  region: str = "eu-west-1",
-                 sso_session_name: Optional[str] = None):
+                 sso_session_name: Optional[str] = None,
+                 profile: str = "sso-browser"):
         """Initialize the SSO Config Generator.
 
         Args:
-            create_directories: Whether to create directory structure
-            use_ou_structure: Whether to use OU structure in directories
-            developer_role_name: Role name to use for .envrc files
-            sso_name: SSO name to use instead of SSO start URL
-            create_repos_md: Whether to create repos.md files
-            skip_sso_name: Whether to skip SSO name in paths
-            unified_root: Custom root directory for unified environment
+            create_directories: Whether to create directory structure (default: False)
+            use_ou_structure: Whether to nest directories by OU hierarchy (default: False)
+            developer_role_name: Role name for .envrc files; omit to skip .envrc creation
+            sso_name: SSO name to use instead of extracting from SSO start URL
+            create_repos_md: Whether to create repos.md placeholder files
+            skip_sso_name: Whether to omit the SSO name top-level directory
+            unified_root: Root directory for the account tree (default: current directory)
             region: AWS region to use (default: eu-west-1)
-            sso_session_name: Name for the SSO session section (default: sso)
+            sso_session_name: Name for the SSO session section (default: auto-detected or "sso")
+            profile: AWS profile used to authenticate (default: sso-browser)
         """
         self.create_directories = create_directories
         self.use_ou_structure = use_ou_structure
@@ -71,20 +72,24 @@ class SSOConfigGenerator:
         # Config paths
         self.aws_config_path = os.environ.get('AWS_CONFIG_FILE', os.path.expanduser("~/.aws/config"))
         self.aws_credentials_path = os.environ.get('AWS_SHARED_CREDENTIALS_FILE', os.path.expanduser("~/.aws/credentials"))
-        
-        # Store cache in the same directory as the config file
-        self.config_dir = os.path.dirname(self.aws_config_path)
+
+        # Resolve symlinks so the cache lives alongside the *real* config file.
+        # When AWS_CONFIG_FILE points elsewhere, or when ~/.aws/config is a symlink
+        # (e.g. managed by aws-envs: ~/.aws/config -> ~/.aws/aws-envs/easytocloud/config),
+        # the cache ends up in the environment-specific directory rather than ~/.aws/.
+        self.config_dir = os.path.dirname(os.path.realpath(self.aws_config_path))
         self.cache_max_age = datetime.timedelta(days=7)
-        self.ou_cache_path = os.path.join(self.config_dir, ".ou.default-sso.json")
+        self.ou_cache_path = os.path.join(self.config_dir, ".ou-cache")  # updated in _set_ou_cache_path
         self.config = configparser.ConfigParser()
 
         # Resolve SSO session name: auto-detect from config if not explicitly provided
         self.sso_session_name = self._resolve_sso_session_name(self._explicit_sso_session_name)
         self.sso_session_section = f"sso-session {self.sso_session_name}"
         
-        # AWS clients - use sso-browser profile for all AWS API calls
+        # AWS clients - authenticate via the configured profile (default: sso-browser)
         # Note: SSO services require explicit accessToken, Organizations uses sigv4
-        self.session = boto3.Session(profile_name='sso-browser', region_name=self.region)
+        self.profile_name = profile
+        self.session = boto3.Session(profile_name=self.profile_name, region_name=self.region)
         self.sso_oidc = self.session.client('sso-oidc')
         self.sso = self.session.client('sso')
         self.org_client = None
@@ -303,25 +308,22 @@ class SSOConfigGenerator:
             return None
 
     def _set_ou_cache_path(self, start_url: Optional[str]) -> None:
-        """Set the OU cache path based on organization identifier in SSO start URL."""
-        cache_key = self._extract_cache_key(start_url)
-        self.ou_cache_path = os.path.join(self.config_dir, f".ou.{cache_key}.json")
+        """Set the OU cache path.
 
-    def _extract_cache_key(self, start_url: Optional[str]) -> str:
-        """Extract cache key from SSO URL (prefix before awsapps.com)."""
-        if start_url:
-            try:
-                hostname = (urlparse(start_url).hostname or "").lower()
-                if hostname.endswith(".awsapps.com"):
-                    org_prefix = hostname[:-len(".awsapps.com")]
-                    if org_prefix:
-                        return re.sub(r"[^A-Za-z0-9._-]", "-", org_prefix)
-            except Exception:
-                pass
+        The cache is always placed in the directory that contains the real config
+        file (symlinks resolved).  The filename is:
 
-        sso_name = self._extract_sso_name(start_url)
-        # Keep cache filename safe and predictable.
-        return re.sub(r"[^A-Za-z0-9._-]", "-", sso_name)
+        * ``.ou-cache``                        — default; one config file = one
+          environment, so no qualifier is needed.
+        * ``.ou-cache.<sso_session_name>``     — when --sso-session-name was
+          explicitly supplied, meaning a single config file hosts multiple SSO
+          sessions and each needs its own cache.
+        """
+        if self._explicit_sso_session_name:
+            safe_name = re.sub(r"[^A-Za-z0-9._-]", "-", self._explicit_sso_session_name)
+            self.ou_cache_path = os.path.join(self.config_dir, f".ou-cache.{safe_name}")
+        else:
+            self.ou_cache_path = os.path.join(self.config_dir, ".ou-cache")
 
     def _is_cache_expired(self, cache_path: str) -> bool:
         """Return True when cache file is older than configured max age."""
@@ -332,7 +334,11 @@ class SSOConfigGenerator:
             return True
 
     def clear_ou_cache_files(self) -> int:
-        """Remove OU cache files from AWS config directory.
+        """Remove OU cache files from the config directory.
+
+        Matches the current cache format (``.ou-cache``, ``.ou-cache.<name>``)
+        as well as legacy formats (``.ou``, ``.ou.<name>.json``) so that old
+        files are cleaned up automatically when --rebuild-cache is used.
 
         Returns:
             int: Number of removed cache files.
@@ -340,9 +346,9 @@ class SSOConfigGenerator:
         removed = 0
         try:
             for file_name in os.listdir(self.config_dir):
-                is_legacy_cache = file_name == ".ou"
-                is_namespaced_cache = file_name.startswith(".ou.") and file_name.endswith(".json")
-                if is_legacy_cache or is_namespaced_cache:
+                is_current_cache = file_name == ".ou-cache" or file_name.startswith(".ou-cache.")
+                is_legacy_cache = file_name == ".ou" or (file_name.startswith(".ou.") and file_name.endswith(".json"))
+                if is_current_cache or is_legacy_cache:
                     cache_file = os.path.join(self.config_dir, file_name)
                     os.remove(cache_file)
                     removed += 1
@@ -439,7 +445,7 @@ class SSOConfigGenerator:
                     self.access_token = None
 
             print("\nNo valid SSO session found. Please run:\n")
-            print("aws sso login --profile sso-browser")
+            print(f"aws sso login --profile {self.profile_name}")
             print("\nThen try again.\n")
             return False
             
@@ -740,10 +746,16 @@ class SSOConfigGenerator:
                 
                 account_path.mkdir(exist_ok=True)
                 
-                # Create .envrc file
-                role_name = self.developer_role_name or account['roles'][0]
-                if role_name in account['roles']:
-                    self._create_envrc_file(account_path, f"{role_name}@{self._sanitize_path(account['name'])}")
+                # Create .envrc file only when a developer role was explicitly requested
+                if self.developer_role_name:
+                    if self.developer_role_name in account['roles']:
+                        self._create_envrc_file(
+                            account_path,
+                            f"{self.developer_role_name}@{self._sanitize_path(account['name'])}",
+                        )
+                    else:
+                        print(f"  Note: role '{self.developer_role_name}' not available in "
+                              f"'{account['name']}' — skipping .envrc")
                     
                 # Create repos.md if requested
                 if self.create_repos_md:

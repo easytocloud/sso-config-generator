@@ -23,7 +23,7 @@ export AWS_PROFILE=my-profile-name
 aws s3 ls
 ```
 
-It also creates a directory structure that mirrors your AWS Organization, making it easy to navigate and manage multiple AWS accounts. Each account directory contains a `.envrc` file (for use with `direnv`) that sets the `AWS_PROFILE` environment variable to the appropriate profile for that account, so that cd-ing into the directory automatically switches to the correct AWS profile.
+Optionally it also creates a directory structure that mirrors your AWS Organization, making it easy to navigate and manage multiple AWS accounts. When a developer role is configured, each account directory receives a `.envrc` file (for use with `direnv`) that sets the `AWS_PROFILE` environment variable for that account, so that cd-ing into the directory automatically switches to the correct AWS profile.
 
 ## Profile Naming Convention
 Profiles are named using the following convention:
@@ -37,24 +37,29 @@ For example, if you have access to the `AdministratorAccess` role in the `DevAcc
 AdministratorAccess@DevAccount
 ```
 
-## Required SSO Browser Profile
+## Authentication Profile
 
-All commands in this repo assume your `~/.aws/config` contains a reusable profile that points at your SSO session in the Organization Management Account. Make sure this block exists (adjust the region, account ID, and role name as needed):
+`sso-config-generator` authenticates through a named AWS profile (default: `sso-browser`, overridable with `--profile`).  That profile must exist in `~/.aws/config` and reference a valid `sso_session`:
 
-```
+```ini
+[sso-session sso]
+sso_region              = eu-west-1
+sso_start_url           = https://my-company.awsapps.com/start
+sso_registration_scopes = sso:account:access
+
 [profile sso-browser]
-sso_session = sso
-sso_account_id = 123456789012          # Your Organization Management Account ID
-sso_role_name = OrganizationAccountRole # Role name with Organizations permissions
-region = eu-west-1
-output = json
+sso_session    = sso
+sso_account_id = 123456789012           # Organization Management Account ID
+sso_role_name  = OrganizationAccountRole
+region         = eu-west-1
+output         = json
 ```
 
 Run `aws sso login --profile sso-browser` before invoking `sso-config-generator` so the CLI can reuse the cached credentials.
 
-### One-Time Setup: sso-browser Profile Configuration
+### One-Time Setup: Authentication Profile Configuration
 
-The `sso-browser` profile is used to retrieve both SSO account information and AWS Organization structure. For full functionality (including OU hierarchy), the SSO role must have the necessary IAM permissions.
+The authentication profile is used to retrieve both SSO account information and (when `--use-ou-structure` is active) AWS Organization structure. The SSO role must have the necessary IAM permissions.
 
 **Role Setup:**
 1. In your AWS SSO console, assign a role to your user account in your **Organization Management Account** (master account)
@@ -181,15 +186,15 @@ Simply run:
 uvx sso-config-generator
 ```
 
-This will:
-- Update your AWS CLI config file (`~/.aws/config`)
-- Generate a directory structure in the current directory + sso-name
-- Create `.envrc` files in each account directory with AdministratorAccess role
-- Use OU structure for directory organization (cached for performance)
+This will update `~/.aws/config` with one profile per account/role combination and nothing else.  Directory creation and `.envrc` generation are opt-in (see options below).
 
-The tool caches OU structure information in the same directory as your AWS config file to improve performance.
-Cache files are organization-scoped using the SSO start URL domain prefix (for example `https://my-easytocloud.awsapps.com/start` uses the cache key `my-easytocloud`).
-If a cache file is older than 7 days, it is ignored and rebuilt automatically.
+The tool caches OU structure and account information in the same directory as the **real** config file (symlinks are resolved, so the cache lands in the environment-specific directory rather than `~/.aws/`).  This works seamlessly with [aws-envs](https://github.com/easytocloud/aws-envs), where `~/.aws/config` is a symlink such as `~/.aws/aws-envs/easytocloud/config` — the cache is then stored as `~/.aws/aws-envs/easytocloud/.ou-cache`.
+
+The cache filename is:
+- `.ou-cache` — default (one config file = one environment, no qualifier needed)
+- `.ou-cache.<sso-session-name>` — when `--sso-session-name` is explicitly supplied (multiple SSO sessions sharing one config file)
+
+If a cache file is older than 7 days it is ignored and rebuilt automatically.
 To force a full cache rebuild:
 
 ```bash
@@ -198,73 +203,101 @@ uvx sso-config-generator --rebuild-cache
 
 ### Command Options
 
-```
-Usage: sso-config-generator [OPTIONS]
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--profile NAME` | `sso-browser` | AWS profile used to authenticate against SSO and AWS Organizations |
+| `--region REGION` | `eu-west-1` | AWS region |
+| `--sso-session-name NAME` | auto-detected | Name of the `[sso-session …]` section in `~/.aws/config` |
+| `--sso-name NAME` | extracted from URL | Override the SSO organisation name |
+| `--create-directories` | off | Create a local directory tree with one directory per account |
+| `--use-ou-structure` | off | Nest account directories under their OU hierarchy (requires `--create-directories`) |
+| `--developer-role-name NAME` | not set | Create a `.envrc` in each account directory exporting `AWS_PROFILE` to this role (requires `--create-directories`; omit to skip `.envrc` creation) |
+| `--unified-root PATH` | current directory | Root directory for the account tree |
+| `--skip-sso-name` | off | Do not create a top-level directory for the SSO organisation name |
+| `--create-repos-md` | off | Create a `repos.md` placeholder in each account directory |
+| `--rebuild-cache` | off | Force a full refresh of the OU / account cache |
+| `--validate` | off | Validate existing configuration instead of generating |
+| `--version` | | Show the version and exit |
+| `--help` | | Show help and exit |
 
-Options:
-  --create-directories/--no-create-directories  Create a directory for each account (default: True)
-  --use-ou-structure/--no-use-ou-structure     Create directories for each OU (default: True)
-  --developer-role-name NAME                   Role name to use for .envrc files (default: AdministratorAccess)
-  --rebuild-cache                              Force rebuild of OU structure cache
-  --sso-name NAME                              Use specified SSO name instead of extracting from SSO start URL
-  --create-repos-md                            Create repos.md files in each account directory
-  --skip-sso-name                              Do not create a directory for the SSO name (default: False)
-  --unified-root PATH                          Directory where account directories are created
-                                               (default: current directory)
-                                               If current directory is named "environment", SSO name is
-                                               automatically skipped
-  --region REGION                              AWS region to use (default: eu-west-1)
-  --validate                                   Validate current AWS SSO configuration instead of generating
-  --help                                       Show this message and exit
-  --version                                    Show the version and exit
+### Configuration File
+
+Frequently used options can be stored in `.sso-config-generator.ini` so you do not have to repeat them on every invocation.  The tool reads (in order, later values override earlier ones):
+
+1. `~/.sso-config-generator.ini`
+2. `./.sso-config-generator.ini` (current working directory)
+
+Command-line flags always take precedence over both files.
+
+A fully annotated sample file with all options set to their defaults (and `DeveloperAccess` as the example developer role) is provided as [`.sso-config-generator.ini.sample`](.sso-config-generator.ini.sample).  Copy and adjust it:
+
+```bash
+# User-wide defaults
+cp .sso-config-generator.ini.sample ~/.sso-config-generator.ini
+
+# Or project-specific overrides
+cp .sso-config-generator.ini.sample .sso-config-generator.ini
+```
+
+Minimal example that enables directory creation with OU nesting and `.envrc` files:
+
+```ini
+[sso-config-generator]
+create_directories  = true
+use_ou_structure    = true
+developer_role_name = DeveloperAccess
 ```
 
 ### Examples
 
-1. Basic config generation (uses defaults):
+1. Update `~/.aws/config` only (default behaviour):
 ```bash
 uvx sso-config-generator
 ```
 
-2. Disable OU structure (flat account directories):
+2. Create a local directory tree:
 ```bash
-uvx sso-config-generator --no-use-ou-structure
+uvx sso-config-generator --create-directories
 ```
 
-3. Use different role for .envrc files:
+3. Directory tree with OU-based nesting:
 ```bash
-uvx sso-config-generator --developer-role-name ReadOnlyAccess
+uvx sso-config-generator --create-directories --use-ou-structure
 ```
 
-4. Use specific AWS region:
+4. Directory tree with `.envrc` files for a specific role:
+```bash
+uvx sso-config-generator --create-directories --developer-role-name DeveloperAccess
+```
+
+5. Use a different authentication profile:
+```bash
+uvx sso-config-generator --profile my-admin-profile
+```
+
+6. Use a specific AWS region:
 ```bash
 uvx sso-config-generator --region us-east-1
 ```
 
-5. Force rebuild of OU cache:
+7. Force a cache rebuild:
 ```bash
 uvx sso-config-generator --rebuild-cache
 ```
 
-5. Specify custom root directory:
+8. Specify a custom root directory:
 ```bash
-uvx sso-config-generator --unified-root ~/aws-environments
+uvx sso-config-generator --create-directories --unified-root ~/aws-environments
 ```
 
-6. Skip creating directories (config file only):
+9. Working in an `environment` directory (Cloud9 / CloudX):
 ```bash
-uvx sso-config-generator --no-create-directories
-```
-
-7. Working in an "environment" directory (automatic behavior):
-```bash
-# If your current directory is named 'environment'
-cd environment
+cd ~/environment
 uvx sso-config-generator
-# This will automatically skip creating the SSO name directory
+# SSO name directory is automatically skipped in an 'environment' directory
 ```
 
-8. Validate existing configuration:
+10. Validate existing configuration:
 ```bash
 uvx sso-config-generator --validate
 ```
