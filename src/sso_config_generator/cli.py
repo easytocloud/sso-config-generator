@@ -7,15 +7,60 @@ from .version import __version__
 from .core import SSOConfigGenerator
 
 
+def _migrate_legacy_config(cwd: str) -> None:
+    """Convert a legacy .generate-sso-config YAML file to .sso-config-generator.ini.
+
+    Called when the CWD contains the old YAML file but not the new ini file.
+    Requires pyyaml which is already a project dependency.
+    """
+    import yaml
+    legacy_path = os.path.join(cwd, '.generate-sso-config')
+    ini_path = os.path.join(cwd, '.sso-config-generator.ini')
+    try:
+        with open(legacy_path) as f:
+            data = yaml.safe_load(f) or {}
+    except Exception:
+        return
+
+    bool_keys = {'create_directories', 'use_ou_structure', 'create_repos_md', 'skip_sso_name'}
+    ini = configparser.ConfigParser()
+    ini['sso-config-generator'] = {}
+    section = ini['sso-config-generator']
+
+    for key, value in data.items():
+        if value is None:
+            continue
+        if key == 'unified_root' and str(value) in ('.', cwd):
+            continue  # redundant when running from CWD
+        section[key] = 'true' if (key in bool_keys and value) else \
+                        'false' if (key in bool_keys) else str(value)
+
+    with open(ini_path, 'w') as f:
+        f.write("# Migrated from .generate-sso-config by sso-config-generator.\n")
+        f.write("# Edit to change behaviour; CLI flags always take precedence.\n\n")
+        ini.write(f)
+
+    os.remove(legacy_path)
+    print(f"Migrated .generate-sso-config → .sso-config-generator.ini in {cwd}")
+
+
 def _read_ini_defaults() -> dict:
     """Read layered .sso-config-generator.ini files and return a default_map for Click.
 
     Reads ~/.sso-config-generator.ini first, then ./.sso-config-generator.ini so that
     the CWD file overrides the home file.  CLI flags always take precedence over both.
+
+    If the CWD contains a legacy .generate-sso-config YAML file but no ini file,
+    it is automatically migrated before reading.
     """
+    cwd = os.getcwd()
+    cwd_ini = os.path.join(cwd, '.sso-config-generator.ini')
+    legacy = os.path.join(cwd, '.generate-sso-config')
+    if os.path.exists(legacy) and not os.path.exists(cwd_ini):
+        _migrate_legacy_config(cwd)
+
     config = configparser.ConfigParser()
     home_ini = os.path.expanduser('~/.sso-config-generator.ini')
-    cwd_ini = os.path.join(os.getcwd(), '.sso-config-generator.ini')
     config.read([home_ini, cwd_ini])
 
     section = 'sso-config-generator'
