@@ -1,3 +1,10 @@
+## [1.7.1](https://github.com/easytocloud/sso-config-generator/compare/v1.7.0...v1.7.1) (2026-03-29)
+
+
+### Bug Fixes
+
+* drop Python <3.10 support to resolve urllib3 CVEs ([00bd52d](https://github.com/easytocloud/sso-config-generator/commit/00bd52dd7a568d4525d5077325900eddab9b1215))
+
 # [1.7.0](https://github.com/easytocloud/sso-config-generator/compare/v1.6.1...v1.7.0) (2026-03-29)
 
 
