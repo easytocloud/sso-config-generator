@@ -265,6 +265,14 @@ class SSOConfigGenerator:
                         pass
                     return self._build_accounts_cache()
 
+                if self.use_ou_structure and not self._cache_built_with_ou_structure():
+                    print("\nOU structure requested but cache was built without it. Rebuilding.\n")
+                    try:
+                        os.remove(self.ou_cache_path)
+                    except OSError:
+                        pass
+                    return self._build_accounts_cache()
+
                 print("\nFound OU cache, using cached data.")
                 print("Use --rebuild-cache to refresh the OU structure.\n")
                 return self._get_accounts_from_cache()
@@ -331,6 +339,18 @@ class SSOConfigGenerator:
             return datetime.datetime.now() - modified_at > self.cache_max_age
         except OSError:
             return True
+
+    def _cache_built_with_ou_structure(self) -> bool:
+        """Return True when the cache was built with OU structure enabled.
+
+        Old caches without the field are treated as flat (returns False) so
+        that switching to use_ou_structure=True always triggers a rebuild.
+        """
+        try:
+            with open(self.ou_cache_path) as f:
+                return json.load(f).get('use_ou_structure', False)
+        except Exception:
+            return False
 
     def clear_ou_cache_files(self) -> int:
         """Remove OU cache files from the config directory.
@@ -524,7 +544,8 @@ class SSOConfigGenerator:
             cache_data = {
                 'ou_tree': ou_tree,
                 'accounts': accounts,
-                'last_updated': datetime.datetime.now().isoformat()
+                'last_updated': datetime.datetime.now().isoformat(),
+                'use_ou_structure': self.use_ou_structure,
             }
             
             os.makedirs(os.path.dirname(self.ou_cache_path), exist_ok=True)
