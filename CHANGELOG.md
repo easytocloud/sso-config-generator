@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/easytocloud/sso-config-generator/compare/v1.7.1...v1.8.0) (2026-03-29)
+
+
+### Features
+
+* replace .generate-sso-config with .sso-config-generator.ini ([2d57e27](https://github.com/easytocloud/sso-config-generator/commit/2d57e27475d74b9455d1635c273d2bd912045b52))
+
 ## [1.7.1](https://github.com/easytocloud/sso-config-generator/compare/v1.7.0...v1.7.1) (2026-03-29)
 
 
