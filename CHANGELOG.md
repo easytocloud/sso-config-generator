@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/easytocloud/sso-config-generator/compare/v1.6.1...v1.7.0) (2026-03-29)
+
+
+### Features
+
+* overhaul CLI defaults, add ini config support, and improve cache placement ([6b17497](https://github.com/easytocloud/sso-config-generator/commit/6b17497284625d32d31c17f42bd98c935e64e7b2))
+
 ## [1.6.1](https://github.com/easytocloud/sso-config-generator/compare/v1.6.0...v1.6.1) (2026-03-27)
 
 
