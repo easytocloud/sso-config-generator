@@ -115,14 +115,14 @@ class _IniConfigCommand(click.Command):
                    'the SSO name directory is skipped automatically.')
 @click.option('--validate', is_flag=True,
               help='Validate the current AWS SSO configuration instead of generating it.')
-@click.option('--region', default='eu-west-1', show_default=True,
+@click.option('--region', '-r', default='eu-west-1', show_default=True,
               help='AWS region.')
 @click.option('--sso-session-name', default=None,
               help='Name of the [sso-session …] section to use in ~/.aws/config. '
                    'Auto-detected when exactly one such section exists, '
                    'otherwise defaults to "sso". '
                    'Useful when multiple SSO environments share the same config file.')
-@click.option('--profile', default='sso-browser', show_default=True,
+@click.option('--profile', '-p', default='sso-browser', show_default=True,
               help='AWS profile used to authenticate against SSO and AWS Organizations. '
                    'Must reference a valid sso_session in ~/.aws/config and have '
                    'permissions for sso:ListAccounts, sso:ListAccountRoles, and '
