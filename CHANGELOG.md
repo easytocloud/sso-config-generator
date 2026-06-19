@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/easytocloud/sso-config-generator/compare/v1.8.3...v1.9.0) (2026-06-19)
+
+
+### Features
+
+* **cli:** add -r/-p short flags for --region and --profile ([#5](https://github.com/easytocloud/sso-config-generator/issues/5)) ([8383ea2](https://github.com/easytocloud/sso-config-generator/commit/8383ea28ab35d2ef7c755ad910031d96eec99bdb))
+
 ## [1.8.3](https://github.com/easytocloud/sso-config-generator/compare/v1.8.2...v1.8.3) (2026-05-12)
 
 ## [1.8.2](https://github.com/easytocloud/sso-config-generator/compare/v1.8.1...v1.8.2) (2026-03-29)
