@@ -14,8 +14,10 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     permissions:
-      contents: write   # semantic-release pushes the version/changelog commit and tag
-      id-token: write   # PyPI Trusted Publishing (OIDC)
+      contents: write        # semantic-release pushes the version/changelog commit and tag
+      issues: write          # @semantic-release/github comments on released issues
+      pull-requests: write   # @semantic-release/github comments on released PRs
+      id-token: write        # PyPI Trusted Publishing (OIDC)
     steps:
       - name: Checkout
         uses: actions/checkout@v4
