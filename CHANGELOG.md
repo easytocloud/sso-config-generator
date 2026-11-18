@@ -1,3 +1,5 @@
+## [1.9.1](https://github.com/easytocloud/sso-config-generator/compare/v1.9.0...v1.9.1) (2026-11-18)
+
 # [1.9.0](https://github.com/easytocloud/sso-config-generator/compare/v1.8.3...v1.9.0) (2026-06-19)
 
 
